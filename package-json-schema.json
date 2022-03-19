@@ -1,0 +1,9 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "properties": {
+    "prettier": {
+      "description": "Fine-i18n-helper configuration",
+      "$ref": "./config-json-schema.json"
+    }
+  }
+}

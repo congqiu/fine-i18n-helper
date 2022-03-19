@@ -1,0 +1,1 @@
+declare module 'rita-google-translate-api';

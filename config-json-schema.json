@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Schema for .i18nrc",
+  "definitions": {
+    "optionsDefinition": {
+      "type": "object",
+      "properties": {
+        "localesPath": {
+          "description": "国际化文件所在文件夹，默认为src/locales",
+          "default": "src/locales",
+          "type": "string"
+        },
+        "mainLocale": {
+          "description": "国际化基准文件，如为空则文件夹第一个为基准文件",
+          "default": "zh_CN.json",
+          "type": "string"
+        },
+        "functionName": {
+          "description": "国际化的方法名",
+          "default": "i18n.get",
+          "type": "string"
+        },
+        "prefix": {
+          "description": "自动生成的key前缀",
+          "default": "",
+          "type": "string"
+        },
+        "entry": {
+          "description": "国际化整个空间的入口文件夹",
+          "default": "src",
+          "type": "string"
+        },
+        "exclude": {
+          "description": "国际化整个空间时排除的文件",
+          "default": [],
+          "type": "array"
+        },
+        "decoratorsBeforeExport": {
+          "description": "针对babel转换decorators的属性",
+          "default": true,
+          "type": "boolean"
+        },
+        "judgeText": {
+          "description": "匹配要被国际化的内容，建议通过js格式直接使用正则",
+          "default": "[\u4e00-\u9fa5]",
+          "type": "string"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/definitions/optionsDefinition"
+        }
+      ]
+    },
+    {
+      "type": "string"
+    }
+  ]
+}

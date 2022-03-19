@@ -1,0 +1,250 @@
+{
+  "name": "fine-i18n-helper",
+  "displayName": "I18n Helper",
+  "description": "帮助项目进行国际化辅助管理工具，助力高效处理国际化相关内容",
+  "keywords": [
+    "i18n",
+    "intl",
+    "translate",
+    "React"
+  ],
+  "version": "0.0.1",
+  "license": "MIT",
+  "publisher": "fine",
+  "engines": {
+    "vscode": "^1.63.0"
+  },
+  "categories": [
+    "Other",
+    "Linters"
+  ],
+  "activationEvents": [
+    "onCommand:fine-i18n-helper.i18nTransformWorkspace",
+    "onCommand:fine-i18n-helper.exportI18nCSV",
+    "onCommand:fine-i18n-helper.importI18nCSV",
+    "onLanguage:json",
+    "onLanguage:javascriptreact",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact"
+  ],
+  "main": "./out/extension.js",
+  "icon": "icon.png",
+  "contributes": {
+    "configuration": {
+      "title": "Fine I18n Helper Configuration",
+      "properties": {
+        "fine-i18n-helper.multiRootTip": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否显示Multi-root工作区提示，一般情况下不需要配置"
+        },
+        "fine-i18n-helper.localesPath": {
+          "type": "string",
+          "default": "src/locales",
+          "description": "国际化文件所在文件夹，默认为src/locales"
+        },
+        "fine-i18n-helper.mainLocale": {
+          "type": "string",
+          "default": "zh_CN.json",
+          "description": "国际化基准文件，如为空则文件夹第一个为基准文件"
+        },
+        "fine-i18n-helper.functionName": {
+          "type": "string",
+          "default": "i18n.get",
+          "description": "i18n的方法名"
+        },
+        "fine-i18n-helper.prefix": {
+          "type": "string",
+          "default": "",
+          "description": "自动生成的key前缀"
+        },
+        "fine-i18n-helper.hoverLocales": {
+          "type": [
+            "string",
+            "array",
+            "null"
+          ],
+          "default": "",
+          "description": "定义hover显示的翻译值，默认或为空字符串显示全部，为null则不显示"
+        },
+        "fine-i18n-helper.showDecorations": {
+          "type": "boolean",
+          "default": false,
+          "description": "是否在当前文件显示key的翻译值"
+        },
+        "fine-i18n-helper.transformOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "是否保存文件的时候自动翻译"
+        },
+        "fine-i18n-helper.definitions": {
+          "type": [
+            "string",
+            "array"
+          ],
+          "default": "",
+          "description": "定义key可跳转的i18n文件"
+        }
+      }
+    },
+    "jsonValidation": [
+      {
+        "fileMatch": ".i18nrc",
+        "url": "./config-json-schema.json"
+      },
+      {
+        "fileMatch": ".i18nrc.json",
+        "url": "./config-json-schema.json"
+      },
+      {
+        "fileMatch": "package.json",
+        "url": "./package-json-schema.json"
+      }
+    ],
+    "languages": [
+      {
+        "id": "json",
+        "filenames": [
+          ".i18nrc"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "fine-i18n-helper.i18nTransformWord",
+        "title": "Transform I18n Word"
+      },
+      {
+        "command": "fine-i18n-helper.i18nTransformFile",
+        "title": "Transform I18n File",
+        "shortTitle": "Transform",
+        "icon": {
+          "light": "./media/icon.svg",
+          "dark": "./media/icon-dark.svg"
+        }
+      },
+      {
+        "command": "fine-i18n-helper.i18nTransformWorkspace",
+        "title": "Transform Current File Workspace Entry I18n Files"
+      },
+      {
+        "command": "fine-i18n-helper.toggleShowI18n",
+        "title": "Toggle Show I18n Decorations"
+      },
+      {
+        "command": "fine-i18n-helper.findI18nInFile",
+        "title": "Find I18n In File"
+      },
+      {
+        "command": "fine-i18n-helper.initConfigFile",
+        "title": "Init I18n Config File"
+      },
+      {
+        "command": "fine-i18n-helper.exportI18nCSV",
+        "title": "Export I18n CSV File"
+      },
+      {
+        "command": "fine-i18n-helper.importI18nCSV",
+        "title": "Import I18n",
+        "icon": {
+          "light": "./media/import.svg",
+          "dark": "./media/import-dark.svg"
+        }
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceLangId =~ /^javascript$|^javascriptreact$|^typescript$|^typescriptreact$/",
+          "command": "fine-i18n-helper.i18nTransformFile",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceExtname == .csv",
+          "command": "fine-i18n-helper.importI18nCSV",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "when": "editorFocus && resourceExtname == .csv",
+          "command": "fine-i18n-helper.importI18nCSV",
+          "group": "1_modification@6"
+        },
+        {
+          "when": "editorFocus && resourceLangId =~ /^javascript$|^javascriptreact$|^typescript$|^typescriptreact$/",
+          "command": "fine-i18n-helper.i18nTransformWord",
+          "group": "2_modification@2"
+        },
+        {
+          "when": "editorFocus && resourceLangId =~ /^javascript$|^javascriptreact$|^typescript$|^typescriptreact$/",
+          "command": "fine-i18n-helper.i18nTransformFile",
+          "group": "2_modification@3"
+        },
+        {
+          "when": "editorFocus && resourceLangId =~ /^javascript$|^javascriptreact$|^typescript$|^typescriptreact$/",
+          "command": "fine-i18n-helper.findI18nInFile",
+          "group": "2_modification@4"
+        },
+        {
+          "when": "editorFocus && resourceLangId =~ /^javascript$|^javascriptreact$|^typescript$|^typescriptreact$/",
+          "command": "fine-i18n-helper.toggleShowI18n",
+          "group": "2_modification@5"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "fine-i18n-helper.toggleShowI18n",
+        "key": "ctrl+alt+t",
+        "mac": "ctrl+cmd+t",
+        "when": "editorTextFocus"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn run compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out"
+  },
+  "devDependencies": {
+    "@types/babel__core": "^7.1.18",
+    "@types/glob": "^7.1.4",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "14.x",
+    "@types/prettier": "^2.4.2",
+    "@types/vscode": "^1.63.0",
+    "@typescript-eslint/eslint-plugin": "^5.1.0",
+    "@typescript-eslint/parser": "^5.1.0",
+    "@vscode/test-electron": "^1.6.2",
+    "eslint": "^8.1.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-unused-imports": "^2.0.0",
+    "mocha": "^9.1.3",
+    "ts-loader": "^9.2.5",
+    "typescript": "^4.4.4",
+    "webpack": "^5.52.1",
+    "webpack-cli": "^4.8.0"
+  },
+  "dependencies": {
+    "@babel/core": "^7.16.7",
+    "@babel/generator": "^7.16.7",
+    "@babel/plugin-syntax-decorators": "^7.16.7",
+    "@babel/plugin-syntax-typescript": "^7.16.7",
+    "@babel/traverse": "^7.16.7",
+    "@babel/types": "^7.16.7",
+    "chardet": "^1.4.0",
+    "cosmiconfig": "^7.0.1",
+    "fast-csv": "^4.3.6",
+    "glob": "^7.2.0",
+    "iconv-lite": "^0.6.3",
+    "prettier": "^2.5.1",
+    "rita-google-translate-api": "^3.1.1"
+  }
+}
