@@ -1,6 +1,6 @@
 import * as t from "@babel/types";
 
-import { DEFAULT_JUDGE_TEXT } from "../constant";
+import { EXT_CONFIG } from "../constant";
 
 import { escapeForRegExp } from ".";
 
@@ -28,7 +28,7 @@ export const getJudgeText = function (judgeText: RegExp | string) {
     try {
       return new RegExp(escapeForRegExp(judgeText));
     } catch (error) {
-      return DEFAULT_JUDGE_TEXT;
+      return EXT_CONFIG.judgeText;
     }
   }
   return judgeText;

@@ -1,20 +1,6 @@
 import { iConfig } from "./configuration";
 import { checkLocalesPath, getWorkspacesLocales } from "./utils/locale";
-
-// 国际化数据{key: value}
-export interface TLocales {
-  [key: string]: string;
-}
-
-// 选定工作区国际化{localeFilepath: TLocales}
-export interface TWLocales {
-  [key: string]: TLocales;
-}
-
-// 全部工作区国际化{workspace.fsPath: TWLocales}
-export interface TWorkspacesLocales {
-  [key: string]: TWLocales;
-}
+import { TWorkspacesLocales } from "./utils/types";
 
 class Locales {
   constructor() {

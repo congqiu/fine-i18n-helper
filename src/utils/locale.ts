@@ -3,10 +3,10 @@ import * as path from "path";
 
 import * as vscode from "vscode";
 
-import { TConfiguration } from "../configuration";
-import { DEFAULT_MAIN_LOCALES, COMMANDS } from "../constant";
+import { BASIC_CONFIG, COMMANDS } from "../constant";
 import { loggingService } from "../lib/loggingService";
-import { TLocales, TWLocales, TWorkspacesLocales } from "../locales";
+
+import { TWLocales, TVsConfiguration, TWorkspacesLocales, TLocales, TBasicConfig } from "./types";
 
 import { getFilename, getJSON, mkdirsSync, sortJSON } from ".";
 
@@ -91,7 +91,7 @@ export function getLocalesData(localesFolder: string) {
  * @param config 配置信息
  * @returns
  */
-export function getWorkspacesLocales(config: TConfiguration) {
+export function getWorkspacesLocales(config: TVsConfiguration) {
   const workspaceFolders = vscode.workspace.workspaceFolders || [];
   const workspacesLocales: TWorkspacesLocales = {};
 
@@ -146,9 +146,9 @@ export function getWLocalesPath(workspacePath: string, localesPath: string) {
  */
 export function getMainLocaleFilename(
   workspacePath: string,
-  config: TConfiguration
+  config: TBasicConfig
 ) {
-  const localesPath = getWLocalesPath(workspacePath, config.localesPath);
+  const localesPath = path.join(workspacePath, config.localesPath);
   if (config.mainLocale) {
     const filename = config.mainLocale;
     if (fs.existsSync(path.join(localesPath, filename))) {
@@ -156,10 +156,25 @@ export function getMainLocaleFilename(
     }
     return (
       fs.readdirSync(localesPath).find((f) => getFilename(f) === filename) ||
-      DEFAULT_MAIN_LOCALES
+      BASIC_CONFIG.mainLocale
     );
   }
-  return fs.readdirSync(localesPath)[0] || DEFAULT_MAIN_LOCALES;
+  return BASIC_CONFIG.mainLocale;
+}
+
+/**
+ * 获取非主国际化文件名，优先从配置中获取
+ * @param workspacePath 工作区路径
+ * @param config 配置信息
+ * @returns 非主国际化文件名
+ */
+export function getOtherLocaleFilenames(
+  workspacePath: string,
+  config: TVsConfiguration
+) {
+  const localesPath = getWLocalesPath(workspacePath, config.localesPath);
+  const mainFilename = getMainLocaleFilename(workspacePath, config);
+  return fs.readdirSync(localesPath).filter(f => f !== mainFilename);
 }
 
 /**
@@ -170,7 +185,7 @@ export function getMainLocaleFilename(
  */
 export function getMainLocalePath(
   workspacePath: string,
-  config: TConfiguration
+  config: TVsConfiguration
 ) {
   const localesPath = getWLocalesPath(workspacePath, config.localesPath);
   const filename = getMainLocaleFilename(workspacePath, config);
@@ -187,7 +202,7 @@ export function getMainLocalePath(
 export function getMainLocaleData(
   workspacePath: string,
   wLocales: TWLocales,
-  config: TConfiguration
+  config: TVsConfiguration
 ) {
   const mainPath = getMainLocalePath(workspacePath, config);
   return wLocales[getFilename(mainPath, true)] || {};
@@ -201,7 +216,7 @@ export function getMainLocaleData(
  */
 export function getLocalesExtname(
   workspacePath: string,
-  config: TConfiguration
+  config: TVsConfiguration
 ) {
   const mainFilename = getMainLocaleFilename(workspacePath, config);
   return path.extname(mainFilename);
@@ -216,7 +231,7 @@ export function getLocalesExtname(
  */
 export function getLocaleFilepath(
   workspacePath: string,
-  config: TConfiguration,
+  config: TVsConfiguration,
   filename: string
 ) {
   const localesPath = getWLocalesPath(workspacePath, config.localesPath);
@@ -243,7 +258,7 @@ export function getLocaleData(wLocales: TWLocales, filename: string) {
 export function getLocaleKeyText(
   key: string,
   wLocales: TWLocales,
-  hoverLocales: TConfiguration["hoverLocales"]
+  hoverLocales: TVsConfiguration["hoverLocales"]
 ) {
   let show = [...Object.keys(wLocales)];
   if (typeof hoverLocales === "string" && hoverLocales !== "") {
@@ -340,7 +355,7 @@ export function removeLocaleData(filepath: string, keys: string[]) {
  */
 export function removeOtherLocales(
   workspacePath: string,
-  config: TConfiguration,
+  config: TVsConfiguration,
   keys: string[]
 ) {
   const localesPath = getWLocalesPath(workspacePath, config.localesPath);
@@ -360,18 +375,17 @@ export function removeOtherLocales(
  * @returns
  */
 export function getLocaleCompletionItem(
-  wLocales: TWLocales,
-  mainLocalePath: string
+  mainLocales: TLocales,
+  wLocales: TWLocales
 ) {
-  const mainLocales = wLocales[path.basename(mainLocalePath)];
-  return Object.keys(mainLocales).map((item) => {
+  return Object.keys(mainLocales).map((key) => {
     const completion = new vscode.CompletionItem(
-      item,
+      key,
       vscode.CompletionItemKind.Variable
     );
-    completion.label = mainLocales[item];
-    completion.documentation = getLocaleKeyText(item, wLocales, "");
-    completion.insertText = item;
+    completion.label = mainLocales[key];
+    completion.documentation = getLocaleKeyText(key, wLocales, "");
+    completion.insertText = key;
     return completion;
   });
 }

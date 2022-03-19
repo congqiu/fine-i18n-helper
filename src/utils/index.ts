@@ -1,15 +1,14 @@
 import * as fs from "fs";
 import * as path from "path";
 
+import translate from "@imlinhanchao/google-translate-api";
 import * as glob from "glob";
-import * as translate from "rita-google-translate-api";
 
-import { TConfiguration } from "../configuration";
-import { EXTENSION_NAME } from "../constant";
+import { TOOL_NAME } from "../constant";
+
 import { loggingService } from "../lib/loggingService";
-import { TLocales, TWLocales } from "../locales";
 
-import { showInformationMessage } from "./message";
+import { TConfiguration, TLocales, TWLocales } from "./types";
 
 /**
  * 获取路径中的文件名
@@ -76,8 +75,8 @@ export function coverFnNameToRegExp(fnName: string) {
   try {
     return new RegExp(str, "gm");
   } catch (error) {
-    showInformationMessage(
-      `${EXTENSION_NAME}配置项functionName转换成正则出错，${error}`
+    loggingService.logError(
+      `${TOOL_NAME}配置项functionName转换成正则出错，${error}`
     );
     return;
   }
@@ -94,9 +93,7 @@ export function coverPrefixToRegExp(prefix: string) {
   try {
     return new RegExp(str, "g");
   } catch (error) {
-    showInformationMessage(
-      `${EXTENSION_NAME}配置项prefix转换成正则出错，${error}`
-    );
+    loggingService.logError(`${TOOL_NAME}配置项prefix转换成正则出错，${error}`);
     return;
   }
 }
@@ -155,13 +152,13 @@ export function getKeyPosition(filepath: string, key: string) {
  * 通过文本获取i18n信息
  * @param text 文本
  * @param locales 当前工作区国际化信息
- * @param config 配置
+ * @param prefix 前缀
  * @returns
  */
 export async function transformText(
   text: string,
   locales: TWLocales,
-  config: TConfiguration
+  prefix: string
 ) {
   let key = "";
   let add = false;
@@ -176,7 +173,7 @@ export async function transformText(
   }
 
   if (!key) {
-    key = await autoTranslateText(text, config.prefix);
+    key = await autoTranslateText(text, prefix);
     add = true;
   }
 
@@ -207,20 +204,30 @@ export function getKeyFromJson(json: TLocales, value: string) {
  * @param prefix 前缀
  * @returns
  */
-export function autoTranslateText(text: string, prefix = "") {
+export function autoTranslateText(
+  text: string,
+  prefix = "",
+  options: translate.IOptions = {}
+) {
+  const { from = "zh-CN", to = "en", ...other } = options;
+  // todo 切换翻译源
   return new Promise<string>((resolve, reject) => {
-    translate(text, { from: "zh-CN", to: "en", tld: "cn" })
+    translate(text, { from, to, ...other })
       .then((res: { text: string }) => {
-        const result =
-          prefix +
-          res.text
-            .replace(/\b(\w)(\w*)/g, function ($0, $1, $2) {
-              return $1.toUpperCase() + $2.toLowerCase();
-            })
-            .replace(/\s+/g, "_")
-            .replace(/"|,|\./g, "");
+        if (!res.text) {
+          reject(res);
+        } else {
+          const result =
+            prefix +
+            res.text
+              .replace(/\b(\w)(\w*)/g, function ($0, $1, $2) {
+                return $1.toUpperCase() + $2.toLowerCase();
+              })
+              .replace(/\s+/g, "_")
+              .replace(/"|,|\./g, "");
 
-        resolve(result);
+          resolve(result);
+        }
       })
       .catch((err: any) => {
         reject(err);

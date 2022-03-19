@@ -25,7 +25,7 @@ export class I18nDecorations {
         timeout = undefined;
       }
       if (throttle) {
-        timeout = setTimeout(this.updateDecorations, 500);
+        timeout = setTimeout(this.updateDecorations.bind(this), 500);
       } else {
         this.updateDecorations();
       }

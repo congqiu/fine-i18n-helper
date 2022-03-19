@@ -11,13 +11,13 @@
           "type": "string"
         },
         "mainLocale": {
-          "description": "国际化基准文件，如为空则文件夹第一个为基准文件",
+          "description": "国际化基准文件",
           "default": "zh_CN.json",
           "type": "string"
         },
         "functionName": {
           "description": "国际化的方法名",
-          "default": "i18n.get",
+          "default": "fineIntl.get",
           "type": "string"
         },
         "prefix": {

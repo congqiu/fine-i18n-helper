@@ -12,17 +12,12 @@ import {
 } from "vscode";
 
 import { iConfig } from "../configuration";
-import { EXTENSION_ALIAS, EXTENSION_NAME } from "../constant";
+import { TOOL_ALIAS, TOOL_NAME } from "../constant";
 import { iEvents } from "../lib/i18nEvents";
-import { loggingService } from "../lib/loggingService";
+import { loggingService, LOG_LEVEL, TLogLevel } from "../lib/loggingService";
 import { iLocales } from "../locales";
 import { getKeyPosition } from "../utils";
-import {
-  getLocaleFilepath,
-  getMainLocaleData,
-  getMainLocaleFilename,
-  updateLocaleData,
-} from "../utils/locale";
+import { getLocaleFilepath, updateLocaleData, getMainLocaleFilename, getMainLocaleData } from "../utils/locale";
 import { getI18nRangesInfo } from "../utils/vscode";
 
 export interface TOpenI18nFileArgs {
@@ -30,6 +25,11 @@ export interface TOpenI18nFileArgs {
   key?: string;
 }
 
+/**
+ * 打开国际化文件
+ * @param args
+ * @returns
+ */
 export const openI18nFile = (args: TOpenI18nFileArgs) => {
   const { filename, key } = args;
   const editor = window.activeTextEditor;
@@ -52,8 +52,15 @@ export const openI18nFile = (args: TOpenI18nFileArgs) => {
     selection: new Range(position, position),
     preview: false,
   });
+  loggingService.logDebug(
+    `打开国际化文件${filename}${key ? "，定位于" + key + "上" : ""}`
+  );
 };
 
+/**
+ * 选择工作区
+ * @param workspaceFolders
+ */
 export const selectWorkspace = (
   workspaceFolders: readonly WorkspaceFolder[]
 ) => {
@@ -63,7 +70,7 @@ export const selectWorkspace = (
         workspaceFolders.map((w) => w.name),
         {
           title: `选择一个工作区作为根路径`,
-          placeHolder: `请为${EXTENSION_NAME}扩展选择一个工作区，可以通过点击左下角状态栏进行切换`,
+          placeHolder: `请为${TOOL_NAME}扩展选择一个工作区，可以通过点击左下角状态栏进行切换`,
         }
       )
       .then(async (val) => {
@@ -72,6 +79,7 @@ export const selectWorkspace = (
             workspaceFolders.find((w) => w.name === val)!.uri.fsPath
           );
           iEvents.watchConfigurationFile(configPath);
+          loggingService.logDebug(`选择了${val}作为新的工作区`);
         }
       });
   }
@@ -82,6 +90,11 @@ export interface TChangeI18nValueArgs {
   text?: string;
 }
 
+/**
+ * 修改国际化的值
+ * @param args
+ * @returns
+ */
 export const changeI18nValue = (args: TChangeI18nValueArgs) => {
   const { key, text } = args;
   const editor = window.activeTextEditor;
@@ -114,6 +127,7 @@ export const changeI18nValue = (args: TChangeI18nValueArgs) => {
         );
       });
       iLocales.reload();
+      loggingService.logDebug(`${key}对应的文案从'${text}'修改为'${value}'`);
     });
 };
 
@@ -155,7 +169,7 @@ export const findI18nInFile = () => {
  * @returns
  */
 export const initConfigFile = async () => {
-  const filename = `.${EXTENSION_ALIAS}rc`;
+  const filename = `.${TOOL_ALIAS}rc`;
   const filepath = path.join(iConfig.workspacePath, filename);
   if (fs.existsSync(filepath)) {
     const result = await window.showWarningMessage(
@@ -180,4 +194,13 @@ export const initConfigFile = async () => {
   );
   window.showTextDocument(Uri.file(filepath), {});
   loggingService.logInfo(`配置文件${filename}写入成功`);
+};
+
+export const changeLogLevel = () => {
+  window.showQuickPick(LOG_LEVEL).then((val) => {
+    if (val) {
+      loggingService.setLogLevel(val as TLogLevel);
+      loggingService.logInfo(`日志等级切换为${val}`);
+    }
+  });
 };

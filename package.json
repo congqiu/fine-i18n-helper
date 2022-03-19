@@ -10,7 +10,11 @@
   ],
   "version": "0.0.1",
   "license": "MIT",
-  "publisher": "fine",
+  "publisher": "Fine",
+  "repository": {
+    "type": "git",
+    "url": "git"
+  },
   "engines": {
     "vscode": "^1.63.0"
   },
@@ -47,11 +51,11 @@
         "fine-i18n-helper.mainLocale": {
           "type": "string",
           "default": "zh_CN.json",
-          "description": "国际化基准文件，如为空则文件夹第一个为基准文件"
+          "description": "国际化基准文件"
         },
         "fine-i18n-helper.functionName": {
           "type": "string",
-          "default": "i18n.get",
+          "default": "fineIntl.get",
           "description": "i18n的方法名"
         },
         "fine-i18n-helper.prefix": {
@@ -113,11 +117,11 @@
     "commands": [
       {
         "command": "fine-i18n-helper.i18nTransformWord",
-        "title": "Transform I18n Word"
+        "title": "转换选中文本"
       },
       {
         "command": "fine-i18n-helper.i18nTransformFile",
-        "title": "Transform I18n File",
+        "title": "转换当前文件",
         "shortTitle": "Transform",
         "icon": {
           "light": "./media/icon.svg",
@@ -126,27 +130,27 @@
       },
       {
         "command": "fine-i18n-helper.i18nTransformWorkspace",
-        "title": "Transform Current File Workspace Entry I18n Files"
+        "title": "转换当前工作区"
       },
       {
         "command": "fine-i18n-helper.toggleShowI18n",
-        "title": "Toggle Show I18n Decorations"
+        "title": "切换国际化信息显隐"
       },
       {
         "command": "fine-i18n-helper.findI18nInFile",
-        "title": "Find I18n In File"
+        "title": "查找当前文件国际化"
       },
       {
         "command": "fine-i18n-helper.initConfigFile",
-        "title": "Init I18n Config File"
+        "title": "初始化国际化配置文件"
       },
       {
         "command": "fine-i18n-helper.exportI18nCSV",
-        "title": "Export I18n CSV File"
+        "title": "导出未处理的国际化"
       },
       {
         "command": "fine-i18n-helper.importI18nCSV",
-        "title": "Import I18n",
+        "title": "导入国际化",
         "icon": {
           "light": "./media/import.svg",
           "dark": "./media/import-dark.svg"
@@ -204,14 +208,17 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "yarn run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "yarn run compile && yarn run lint",
+    "vscode:prepublish": "yarn clean && yarn esbuild-base -- --minify",
     "lint": "eslint src --ext ts",
+    "compile": "tsc -p ./",
+    "watch:tsc": "tsc -watch -p ./",
+    "pretest": "yarn compile && yarn lint",
     "test": "node ./out/test/runTest.js",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out"
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "yarn esbuild-base -- --sourcemap",
+    "clean": "rimraf out/",
+    "watch": "yarn esbuild-base -- --sourcemap --watch",
+    "build": "vsce package"
   },
   "devDependencies": {
     "@types/babel__core": "^7.1.18",
@@ -223,14 +230,13 @@
     "@typescript-eslint/eslint-plugin": "^5.1.0",
     "@typescript-eslint/parser": "^5.1.0",
     "@vscode/test-electron": "^1.6.2",
+    "esbuild": "^0.14.19",
     "eslint": "^8.1.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-unused-imports": "^2.0.0",
     "mocha": "^9.1.3",
-    "ts-loader": "^9.2.5",
-    "typescript": "^4.4.4",
-    "webpack": "^5.52.1",
-    "webpack-cli": "^4.8.0"
+    "rimraf": "^3.0.2",
+    "typescript": "^4.4.4"
   },
   "dependencies": {
     "@babel/core": "^7.16.7",
@@ -239,12 +245,12 @@
     "@babel/plugin-syntax-typescript": "^7.16.7",
     "@babel/traverse": "^7.16.7",
     "@babel/types": "^7.16.7",
+    "@imlinhanchao/google-translate-api": "^8.0.1",
     "chardet": "^1.4.0",
     "cosmiconfig": "^7.0.1",
     "fast-csv": "^4.3.6",
     "glob": "^7.2.0",
     "iconv-lite": "^0.6.3",
-    "prettier": "^2.5.1",
-    "rita-google-translate-api": "^3.1.1"
+    "prettier": "^2.5.1"
   }
 }

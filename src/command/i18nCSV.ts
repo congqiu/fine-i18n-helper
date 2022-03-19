@@ -1,25 +1,22 @@
-import * as fs from "fs";
 import * as path from "path";
 
-import { Row, writeToStream } from "@fast-csv/format";
-import { parse } from "@fast-csv/parse";
-import * as chardet from "chardet";
-import * as iconv from "iconv-lite";
 import { window } from "vscode";
 
 import { iConfig } from "../configuration";
 import { loggingService } from "../lib/loggingService";
 import { iLocales } from "../locales";
 import { getFilename } from "../utils";
+import { csv2json, json2csv } from "../utils/csv";
 import {
-  updateLocaleData,
   getLocaleData,
-  getLocaleFilepath,
   getMainLocaleData,
+  updateLocaleData,
   getLocalesExtname,
+  getLocaleFilepath,
+  getOtherLocaleFilenames,
 } from "../utils/locale";
+import { showErrorMessageTip, showInfoMessage } from "../utils/vscode";
 
-const I18N_VALUE_KEY = "i18n";
 class I18nCSV {
   async exportCSV() {
     const editor = window.activeTextEditor;
@@ -30,35 +27,38 @@ class I18nCSV {
     const config = iConfig.config;
     const workspacePath = iConfig.workspacePath;
     const mainLocalesData = getMainLocaleData(workspacePath, locales, config);
-    const filenames = (
+    const extname = getLocalesExtname(workspacePath, config);
+    const filenames = getOtherLocaleFilenames(workspacePath, config).map(
+      (filename) => getFilename(filename)
+    );
+    const languages = (
       await window.showInputBox({
-        title: "请输入要导出的文件名",
-        prompt: "如需同时导出多份，请以,分割文件名",
-        placeHolder: "请输入en_US.json,ja_JP.json类似格式",
+        title: "请输入要导出的国际化名称如en_US",
+        value: filenames.join(","),
+        prompt: "如需同时导出多份，请以,分割导出的国际化名称",
+        placeHolder: "请输入en_US,ja_JP类似格式",
       })
     )?.split(",");
-    filenames?.slice(1).forEach((filename) => {
-      const languageData = getLocaleData(locales, filename);
-      const rows: Row[] = [];
-      Object.keys(mainLocalesData).forEach((key) => {
-        if (!languageData[key]) {
-          rows.push({
-            key,
-            main: mainLocalesData[key]?.replace(/[\n]/g, "\\n"),
-            [I18N_VALUE_KEY]: languageData[key]?.replace(/[\n]/g, "\\n") || "",
-          });
+    if (languages?.length) {
+      languages.forEach((language) => {
+        try {
+          const languageData = getLocaleData(locales, language + extname);
+          json2csv(
+            path.join(workspacePath, `${language}.csv`),
+            mainLocalesData,
+            languageData
+          );
+          loggingService.logInfo(
+            `${language}.csv导出完成，请检查工作区目录下csv文件`
+          );
+        } catch (error) {
+          showErrorMessageTip(`${language}.csv导出失败`, error);
         }
       });
-      writeToStream(
-        fs.createWriteStream(
-          path.join(workspacePath, `${getFilename(filename)}.csv`)
-        ),
-        rows,
-        { headers: true, writeBOM: true }
-      );
-    });
-    loggingService.logInfo("导出完成，请检查工作区目录下csv文件");
-    window.showInformationMessage("导出完成，请检查工作区目录下csv文件");
+      showInfoMessage("导出完成，请检查工作区目录下csv文件");
+    } else {
+      loggingService.logDebug("未获得导出的文件名");
+    }
   }
 
   uploadCSV() {
@@ -75,32 +75,14 @@ class I18nCSV {
     const filename = language + getLocalesExtname(workspacePath, config);
     const mainLocalesData = getMainLocaleData(workspacePath, locales, config);
     const languageData = getLocaleData(locales, filename);
-    fs.createReadStream(fsPath)
-      .pipe(iconv.decodeStream(chardet.detectFileSync(fsPath) as string))
-      .pipe(iconv.encodeStream("utf8"))
-      .pipe(
-        parse({
-          headers: true,
-          encoding: "utf8",
-        })
-      )
-      .on("error", (error) => {
-        loggingService.logError(`上传${filename}失败`, error);
-        window.showErrorMessage(error.message);
-      })
-      .on("data", (row) => {
-        if (
-          mainLocalesData[row.key] !== undefined &&
-          row[I18N_VALUE_KEY] !== undefined
-        ) {
-          languageData[row.key] = row[I18N_VALUE_KEY]?.replace(/\\n/g, "\n");
-        }
-      })
-      .on("end", () => {
+    csv2json(fsPath, mainLocalesData, languageData)
+      .then((data) => {
         const localePath = getLocaleFilepath(workspacePath, config, filename);
-        localePath && updateLocaleData(localePath, languageData);
-        loggingService.logInfo(`上传成功，已合并到${filename}中`);
-        window.showInformationMessage(`上传成功，已合并到${filename}中`);
+        localePath && updateLocaleData(localePath, data);
+        showInfoMessage(`上传成功，已合并到${filename}中`);
+      })
+      .catch((error) => {
+        showErrorMessageTip(`上传${filename}的国际化失败`, error);
       });
   }
 }

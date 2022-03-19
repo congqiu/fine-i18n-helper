@@ -11,11 +11,7 @@ import { i18nTransformFile } from "../command/i18nTransformFile";
 import { iConfig } from "../configuration";
 import { iLocales } from "../locales";
 import { getJSON } from "../utils";
-import {
-  getMainLocalePath,
-  getMainLocaleData,
-  removeOtherLocales,
-} from "../utils/locale";
+import { getMainLocaleData, getMainLocalePath, removeOtherLocales } from "../utils/locale";
 import { isTargetLanguages } from "../utils/vscode";
 
 export class I18nEvents {

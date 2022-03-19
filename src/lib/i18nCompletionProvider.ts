@@ -2,7 +2,7 @@ import { CompletionItemProvider, TextDocument, Position } from "vscode";
 
 import { iConfig } from "../configuration";
 import { iLocales } from "../locales";
-import { getLocaleCompletionItem, getMainLocalePath } from "../utils/locale";
+import { getLocaleCompletionItem, getMainLocaleData } from "../utils/locale";
 
 export class I18nCompletionItemProvider implements CompletionItemProvider {
   provideCompletionItems(document: TextDocument, position: Position) {
@@ -25,8 +25,8 @@ export class I18nCompletionItemProvider implements CompletionItemProvider {
       return;
     }
     return getLocaleCompletionItem(
-      locales,
-      getMainLocalePath(workspacePath, config)
+      getMainLocaleData(workspacePath, locales, config),
+      locales
     );
   }
 }

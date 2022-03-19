@@ -1,15 +1,17 @@
 import { window } from "vscode";
 
-import { EXTENSION_ALIAS } from "../constant";
+import { TOOL_ALIAS } from "../constant";
 
-type LogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR" | "NONE";
+export const LOG_LEVEL = <const>["DEBUG", "INFO", "WARN", "ERROR", "NONE"];
+
+export type TLogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR" | "NONE";
 
 export class LoggingService {
-  private outputChannel = window.createOutputChannel(EXTENSION_ALIAS);
+  private outputChannel = window.createOutputChannel(TOOL_ALIAS);
 
-  private logLevel: LogLevel = "INFO";
+  private logLevel: TLogLevel = "DEBUG";
 
-  public setLogLevel(logLevel: LogLevel) {
+  public setLogLevel(logLevel: TLogLevel) {
     this.logLevel = logLevel;
   }
 
@@ -59,7 +61,7 @@ export class LoggingService {
     this.outputChannel.appendLine(message);
   }
 
-  private logMessage(message: string, logLevel: LogLevel) {
+  private logMessage(message: string, logLevel: TLogLevel) {
     // todo delete
     // eslint-disable-next-line no-console
     console.log(message);

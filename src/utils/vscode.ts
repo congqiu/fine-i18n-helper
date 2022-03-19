@@ -2,11 +2,13 @@ import * as path from "path";
 
 import * as vscode from "vscode";
 
-import { TConfiguration } from "../configuration";
+import { COMMANDS } from "../constant";
 import { loggingService } from "../lib/loggingService";
-import { TLocales } from "../locales";
+
+import { TLocales, TVsConfiguration } from "./types";
 
 import { coverFnNameToRegExp, coverPrefixToRegExp, getKeyPosition } from ".";
+
 
 /**
  * 获取当前文件所在工作区
@@ -33,7 +35,7 @@ export function getCurrentWorkspace(document: vscode.TextDocument) {
 export const getI18nRange = (
   document: vscode.TextDocument,
   position: vscode.Position,
-  config: TConfiguration
+  config: TVsConfiguration
 ) => {
   const regex = coverFnNameToRegExp(config.functionName);
   let matchRange = document.getWordRangeAtPosition(position, regex);
@@ -124,4 +126,18 @@ export const isTargetLanguages = (language: string) => {
     "typescript",
     "typescriptreact",
   ].includes(language);
+};
+
+export const showErrorMessageTip = (message: string, error?: unknown) => {
+  loggingService.logError(message, error);
+  vscode.window.showErrorMessage(message, "查看输出日志").then((v) => {
+    if (v === "查看输出日志") {
+      vscode.commands.executeCommand(COMMANDS.openOutput.cmd);
+    }
+  });
+};
+
+export const showInfoMessage = (message: string, data?: unknown) => {
+  loggingService.logInfo(message, data);
+  vscode.window.showInformationMessage(message);
 };

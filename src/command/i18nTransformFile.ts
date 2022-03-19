@@ -1,72 +1,23 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import * as babel from "@babel/core";
-import generate from "@babel/generator";
-import traverse from "@babel/traverse";
-import * as t from "@babel/types";
-import * as prettier from "prettier";
 import { Position, window, Selection, ProgressLocation } from "vscode";
 
-import { TConfiguration, iConfig } from "../configuration";
+import { iConfig } from "../configuration";
+
 import { loggingService } from "../lib/loggingService";
-import { TLocales, iLocales } from "../locales";
-import { getEntryFiles, getFilename, autoTranslateText } from "../utils";
-import {
-  generateI18nFunction,
-  getJudgeText,
-  hasI18nText,
-  replaceLineBreak,
-} from "../utils/ast";
-import {
-  createLocalesFolder,
-  getMainLocaleData,
-  getMainLocalePath,
-  updateLocaleData,
-} from "../utils/locale";
-
-interface TPathInfo {
-  text: string;
-  path: any;
-  isJsx?: boolean;
-  vars?: t.Expression[];
-}
-
-type TAstConfig = TConfiguration & {
-  isTsx: boolean;
-};
-
-function doPathReplace(pathInfo: Omit<TPathInfo, "text">, value: string) {
-  const { isJsx, path, vars } = pathInfo;
-  const functionName = iConfig.config.functionName;
-  const doReplace = () => {
-    return t.callExpression(
-      generateI18nFunction(functionName),
-      vars ? [t.stringLiteral(value), ...vars] : [t.stringLiteral(value)]
-    );
-  };
-
-  try {
-    isJsx
-      ? path.replaceWith(t.jSXExpressionContainer(doReplace()))
-      : path.replaceWith(doReplace());
-  } catch (error) {
-    loggingService.logError("path替换失败", error);
-  }
-}
+import { iLocales } from "../locales";
+import { getEntryFiles, getFilename } from "../utils";
+import { createLocalesFolder, getMainLocaleData, getMainLocalePath, updateLocaleData } from "../utils/locale";
+import { Transform } from "../utils/transform";
+import { TLocales, TVsConfiguration } from "../utils/types";
+import { showErrorMessageTip } from "../utils/vscode";
 
 export class I18nTransformFile {
-  private getParseOption(config: TAstConfig): babel.TransformOptions {
-    return {
-      sourceType: "module",
-      plugins: [
-        [require("@babel/plugin-syntax-typescript"), { isTSX: config.isTsx }],
-        [
-          require("@babel/plugin-syntax-decorators"),
-          { decoratorsBeforeExport: config.decoratorsBeforeExport },
-        ],
-      ],
-    };
+  private i18nTransform: Transform;
+
+  constructor() {
+    this.i18nTransform = new Transform();
   }
 
   async transformWorkspace() {
@@ -78,28 +29,39 @@ export class I18nTransformFile {
 
     const workspacePath = iConfig.workspacePath;
 
-    if (!iLocales.check(workspacePath)) {
-      const res = await window.showInformationMessage(
-        `当前工作区未检测到${config.localesPath}文件夹，是否创建文件夹并继续执行？`,
-        { modal: true },
-        ...["创建", "停止"]
-      );
-      if (res === "创建") {
-        createLocalesFolder(workspacePath, config.localesPath);
+    if (
+      !this.checkLocalesPath(workspacePath, config.localesPath, () => {
         this.transformWorkspace();
-      }
+      })
+    ) {
       return;
     }
+
+    const handleResult = await window.showQuickPick(
+      [
+        "自动处理不存在的文案",
+        "只处理国际化文件中已有的文案",
+        "只收集原始文案到国际化文件中",
+      ],
+      { title: "请选择要处理的文案操作" }
+    );
+
+    if (!handleResult) {
+      return;
+    }
+    const onlyExist = handleResult === "只处理国际化文件中已有的文案";
+    const isExtract = handleResult === "只收集原始文案到国际化文件中";
 
     const wLocales = iLocales.wLocales;
     const locales = wLocales
       ? getMainLocaleData(workspacePath, wLocales, config)
       : {};
 
+    const hasFail = false;
     await window.withProgress(
       {
         location: ProgressLocation.Notification,
-        title: "转换工作区中，请勿操作文件！",
+        title: "正在处理当前工作区设定的内容，请勿操作文件！",
         cancellable: false,
       },
       async (progress) => {
@@ -117,21 +79,38 @@ export class I18nTransformFile {
             message: `正在处理第${index + 1}/${files.length + 1}个文件...`,
           });
           try {
-            const result = await this.transform({
-              filepath,
-              locales,
-              config,
-            });
-            if (result) {
-              const { newLocales, outputCode } = result;
-              fs.writeFileSync(filepath, outputCode);
-              needAddLocales = { ...needAddLocales, ...newLocales };
+            if (isExtract) {
+              const texts = await this.i18nTransform.handleTexts(
+                this.i18nTransform.extract(filepath, config),
+                locales,
+                config.prefix
+              );
+              texts
+                .filter((v) => !v.exist)
+                .forEach((v) => {
+                  needAddLocales = { ...needAddLocales, [v.key]: v.text };
+                });
+            } else {
+              const result = await this.i18nTransform.transform({
+                filepath,
+                locales,
+                config: {
+                  ...config,
+                  onlyExist,
+                },
+              });
+              if (result) {
+                const { newLocales, outputCode } = result;
+                fs.writeFileSync(filepath, outputCode);
+                needAddLocales = { ...needAddLocales, ...newLocales };
+              }
             }
           } catch (error) {
-            loggingService.logError(
-              getFilename(filepath) + "转换处理失败",
-              error
-            );
+            const msg = getFilename(filepath) + "处理失败";
+            // 第一次报错用error级别，防止错误信息过多
+            hasFail
+              ? loggingService.logDebug(msg, error)
+              : loggingService.logError(msg, error);
           }
         }
 
@@ -146,7 +125,9 @@ export class I18nTransformFile {
       }
     );
 
-    window.showInformationMessage("工作区内容转换完成！");
+    hasFail
+      ? showErrorMessageTip("当前工作区部分内处理失败！")
+      : window.showInformationMessage("当前工作区设定的内容处理完成！");
   }
 
   async transformActive() {
@@ -159,16 +140,11 @@ export class I18nTransformFile {
 
     const workspacePath = iConfig.workspacePath;
 
-    if (!iLocales.check(workspacePath)) {
-      const res = await window.showInformationMessage(
-        `当前工作区未检测到${config.localesPath}文件夹，是否创建文件夹并继续执行？`,
-        { modal: true },
-        ...["创建", "停止"]
-      );
-      if (res === "创建") {
-        createLocalesFolder(workspacePath, config.localesPath);
+    if (
+      !this.checkLocalesPath(workspacePath, config.localesPath, () => {
         this.transformActive();
-      }
+      })
+    ) {
       return;
     }
 
@@ -178,215 +154,90 @@ export class I18nTransformFile {
       : {};
 
     const filepath = document.uri.fsPath;
-    try {
-      const result = await this.transform({
-        filepath,
-        locales,
-        config,
-      });
-      if (!result) {
-        return;
+    
+    await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "正在转换当前文件，请勿操作文件！",
+        cancellable: false,
+      },
+      async (progress) => {
+        progress.report({ increment: 0 });
+
+        try {
+          const result = await this.i18nTransform.transform({
+            filepath,
+            locales,
+            config,
+          });
+          if (!result) {
+            loggingService.logDebug(`${filepath}无需再次进行转换`);
+            window.showInformationMessage("未找到需要转换的内容");
+            return new Promise<void>((resolve) => {
+              resolve();
+            });
+          }
+          const { newLocales, outputCode } = result;
+    
+          progress.report({
+            increment: 99,
+            message: "正在将国际化数据写入国际化文件中",
+          });
+
+          this.addLocalesToFile(workspacePath, config, newLocales);
+    
+          editor.edit((editBuilder) => {
+            editBuilder.replace(
+              new Selection(
+                new Position(0, 0),
+                new Position(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+              ),
+              outputCode
+            );
+          });
+    
+          window.showInformationMessage("文件内容转换完成！");
+          loggingService.logDebug(`${filepath}文件内容转换完成！`);
+        } catch (error) {
+          progress.report({
+            increment: 100,
+            message: "文件内容转换失败",
+          });
+          showErrorMessageTip(`文件内容转换失败，详细信息请查看输出日志`, error);
+        }
+
+        return new Promise<void>((resolve) => {
+          resolve();
+        });
       }
-      const { newLocales, outputCode } = result;
-
-      this.addLocalesToFile(workspacePath, config, newLocales);
-
-      editor.edit((editBuilder) => {
-        editBuilder.replace(
-          new Selection(
-            new Position(0, 0),
-            new Position(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
-          ),
-          outputCode
-        );
-      });
-
-      window.showInformationMessage("文件内容转换完成！");
-    } catch (error) {
-      loggingService.logError("文件内容转换失败", error);
-      window.showErrorMessage("文件内容转换失败: " + error);
-    }
+    );
   }
 
-  // todo 支持import形式的
-  async transform(options: {
-    filepath: string;
-    locales: TLocales;
-    config: TConfiguration;
-  }) {
-    const { filepath, locales, config } = options;
-    const localesMap = new Map();
-    Object.keys(locales).forEach((key) => localesMap.set(locales[key], key));
-
-    // 解析当前文档为ast
-    const inCode = fs.readFileSync(filepath).toString();
-    const ast = babel.parseSync(
-      inCode,
-      this.getParseOption({
-        ...config,
-        isTsx: path.extname(filepath) === ".tsx",
-      })
-    )!;
-
-    const texts: TPathInfo[] = [];
-    let hasTransformed = false;
-
-    const judgeText = getJudgeText(config.judgeText);
-
-    // 遍历ast
-    traverse(ast, {
-      JSXText(path) {
-        const value = path.node.value.trim();
-        if (hasI18nText(judgeText, value)) {
-          hasTransformed = true;
-          if (localesMap.has(value)) {
-            doPathReplace({ path, isJsx: true }, localesMap.get(value));
-          } else {
-            texts.push({
-              text: value,
-              path,
-              isJsx: true,
-            });
-          }
-        }
-        path.skip();
-      },
-      CallExpression(path) {
-        const callee = path.node.callee;
-        const functionNames = config.functionName.split(".").reverse();
-        const isIdentifierName = functionNames.length === 1;
-
-        // 跳过已经被国际化函数处理的内容
-        if (t.isMemberExpression(callee) && !isIdentifierName) {
-          let obj = { ...callee };
-          const latestIdentifier = functionNames.pop();
-          // 判断对象形式的functionName，例如intl.i18n.get
-          if (
-            functionNames.every((name) => {
-              if (t.isIdentifier(obj.property) && obj.property.name === name) {
-                if (t.isMemberExpression(obj.object)) {
-                  obj = { ...obj.object };
-                  return true;
-                } else if (
-                  t.isIdentifier(obj.object) &&
-                  obj.object.name === latestIdentifier
-                ) {
-                  return true;
-                }
-              }
-            })
-          ) {
-            path.skip();
-          }
-        } else if (
-          t.isIdentifier(callee) &&
-          isIdentifierName &&
-          callee.name === config.functionName
-        ) {
-          path.skip();
-        }
-      },
-      StringLiteral(path) {
-        const value = path.node.value.trim();
-        if (hasI18nText(judgeText, value)) {
-          hasTransformed = true;
-          if (localesMap.has(value)) {
-            doPathReplace(
-              { path, isJsx: t.isJSXAttribute(path.parent) },
-              localesMap.get(value)
-            );
-          } else {
-            texts.push({
-              text: value,
-              path,
-              isJsx: t.isJSXAttribute(path.parent),
-            });
-          }
-        }
-        path.skip();
-      },
-      TemplateLiteral(path) {
-        if (
-          path.node.quasis.some((word) =>
-            hasI18nText(judgeText, word.value.cooked)
-          )
-        ) {
-          const nodes = ([] as any[])
-            .concat(path.node.quasis, path.node.expressions)
-            .sort(function (a, b) {
-              return a.start - b.start;
-            });
-          let hasI18n = false;
-          let v = "";
-          const vars: TPathInfo["vars"] = [];
-          nodes.forEach(function (node) {
-            if (t.isTemplateElement(node)) {
-              const cooked = node.value.cooked;
-              v += `${replaceLineBreak(cooked)}`;
-              if (hasI18nText(judgeText, cooked)) {
-                hasTransformed = true;
-                hasI18n = true;
-              }
-            } else {
-              v += `{}`;
-              vars.push(node);
-            }
-          });
-          v = v.trim();
-          if (!hasI18n || v === "") {
-            path.skip();
-            return;
-          }
-          if (localesMap.has(v)) {
-            doPathReplace({ path, vars }, localesMap.get(v));
-          } else {
-            texts.push({
-              text: v,
-              path,
-              isJsx: false,
-              vars,
-            });
-          }
-        }
-        path.skip();
-      },
-    });
-
-    const newLocales: TLocales = {};
-    for (let i = 0; i < texts.length; i++) {
-      if (!localesMap.has(texts[i].text)) {
-        const key = await autoTranslateText(texts[i].text, config.prefix);
-        localesMap.set(texts[i].text, key);
-        newLocales[key] = texts[i].text;
+  private async checkLocalesPath(
+    workspacePath: string,
+    localesPath: string,
+    cb: () => void
+  ) {
+    if (!iLocales.check(workspacePath)) {
+      loggingService.logDebug(`当前工作区未检测到${localesPath}文件夹`);
+      const res = await window.showInformationMessage(
+        `当前工作区未检测到${localesPath}文件夹，是否创建文件夹并继续执行？`,
+        { modal: true },
+        ...["创建", "停止"]
+      );
+      if (res === "创建") {
+        createLocalesFolder(workspacePath, localesPath);
+        loggingService.logDebug(`新建${localesPath}文件夹并继续！`);
+        cb();
       }
-      doPathReplace(texts[i], localesMap.get(texts[i].text));
+      return false;
     }
-
-    const output = generate(
-      ast,
-      {
-        decoratorsBeforeExport: config.decoratorsBeforeExport,
-      },
-      inCode
-    );
-    let outputCode = output.code;
-    try {
-      outputCode = prettier.format(outputCode, {
-        parser: "babel-ts",
-      });
-    } catch (error) {}
-
-    if (hasTransformed) {
-      return {
-        outputCode,
-        newLocales,
-      };
-    }
+    return true;
   }
 
   private addLocalesToFile(
     workspacePath: string,
-    config: TConfiguration,
+    config: TVsConfiguration,
     locales: TLocales
   ) {
     if (Object.keys(locales).length > 0) {

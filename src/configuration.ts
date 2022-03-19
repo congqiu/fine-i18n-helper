@@ -1,41 +1,16 @@
 import { cosmiconfig } from "cosmiconfig";
 import { workspace } from "vscode";
 
-import { EXTENSION_ALIAS, EXTENSION_ID } from "./constant";
+import { BASIC_CONFIG, EXT_CONFIG, TOOL_ALIAS, TOOL_ID } from "./constant";
+
 import { loggingService } from "./lib/loggingService";
+import { getFilename } from "./utils";
+import { TConfiguration, TVsConfiguration } from "./utils/types";
 
-export interface TCommonConfiguration {
-  localesPath: string;
-  mainLocale: string;
-  functionName: string;
-  prefix: string;
-}
 
-export type TVsConfiguration = TCommonConfiguration & {
-  multiRootTip: boolean;
-  hoverLocales: string | string[] | null;
-  showDecorations: boolean;
-  definitions: string | string[];
-  transformOnSave: boolean;
-  watchMode: boolean;
-};
-
-export type TExtendConfiguration = TCommonConfiguration & {
-  entry: string;
-  exclude: string | string[];
-  decoratorsBeforeExport: boolean;
-  // importLine: string;
-  judgeText: RegExp | string;
-};
-
-export type TConfiguration = TVsConfiguration & TExtendConfiguration;
-
-const DEFAULT = {
+const VS_CONFIG = {
+  ...BASIC_CONFIG,
   multiRootTip: true,
-  localesPath: "src/locales",
-  mainLocale: "zh_CN.json",
-  functionName: "i18n.get",
-  prefix: "",
   showDecorations: false,
   hoverLocales: "",
   definitions: "",
@@ -43,35 +18,23 @@ const DEFAULT = {
   watchMode: true,
 };
 
-const EXTEND_DEFAULT = {
-  localesPath: "src/locales",
-  mainLocale: "zh_CN.json",
-  functionName: "i18n.get",
-  prefix: "",
-  entry: "src",
-  exclude: [],
-  decoratorsBeforeExport: true,
-  // importLine: "",
-  judgeText: /[\u4e00-\u9fa5]/,
-};
-
 class I18nConfig {
   public workspacePath = "";
-  public fConfig: TExtendConfiguration;
+  public fConfig: TConfiguration;
   public vsConfig: TVsConfiguration = {
-    ...DEFAULT,
+    ...VS_CONFIG,
   };
 
   public constructor() {
     this.getVsConfig();
-    this.fConfig = { ...EXTEND_DEFAULT };
+    this.fConfig = { ...BASIC_CONFIG, ...EXT_CONFIG };
   }
 
   // 文件配置 > vscode配置 > 默认配置
   public get config() {
     return {
-      ...DEFAULT,
-      ...EXTEND_DEFAULT,
+      ...VS_CONFIG,
+      ...EXT_CONFIG,
       ...this.vsConfig,
       ...this.fConfig,
     };
@@ -81,25 +44,25 @@ class I18nConfig {
    * 获取vscode配置项
    */
   public getVsConfig() {
-    const config = workspace.getConfiguration(EXTENSION_ID);
+    const config = workspace.getConfiguration(TOOL_ID);
     this.vsConfig = {
-      multiRootTip: config.get("multiRootTip", DEFAULT.multiRootTip),
-      localesPath: config.get("localesPath", DEFAULT.localesPath),
-      mainLocale: config.get("mainLocale", DEFAULT.mainLocale),
-      functionName: config.get("functionName", DEFAULT.functionName),
-      prefix: config.get("prefix", DEFAULT.prefix),
-      showDecorations: config.get("showDecorations", DEFAULT.showDecorations),
-      hoverLocales: config.get("hoverLocales", DEFAULT.hoverLocales),
-      definitions: config.get("definitions", DEFAULT.definitions),
-      transformOnSave: config.get("transformOnSave", DEFAULT.transformOnSave),
-      watchMode: config.get("watchMode", DEFAULT.watchMode),
+      localesPath: config.get("localesPath", VS_CONFIG.localesPath),
+      mainLocale: config.get("mainLocale", VS_CONFIG.mainLocale),
+      functionName: config.get("functionName", VS_CONFIG.functionName),
+      prefix: config.get("prefix", VS_CONFIG.prefix),
+      multiRootTip: config.get("multiRootTip", VS_CONFIG.multiRootTip),
+      showDecorations: config.get("showDecorations", VS_CONFIG.showDecorations),
+      hoverLocales: config.get("hoverLocales", VS_CONFIG.hoverLocales),
+      definitions: config.get("definitions", VS_CONFIG.definitions),
+      transformOnSave: config.get("transformOnSave", VS_CONFIG.transformOnSave),
+      watchMode: config.get("watchMode", VS_CONFIG.watchMode),
     };
   }
 
   /**
    * 切换工作区
    * @param wPath 当前工作区目录
-   * @returns
+   * @returns 配置文件路径
    */
   public async updateWorkspacePath(wPath: string) {
     this.workspacePath = wPath;
@@ -112,28 +75,31 @@ class I18nConfig {
    * @param value 配置项值
    */
   public async updateVsConfig(section: string, value: any) {
-    const config = workspace.getConfiguration(EXTENSION_ID);
+    const config = workspace.getConfiguration(TOOL_ID);
     await config.update(section, value);
   }
 
   /**
    * 从配置文件读取配置
+   * @returns 配置文件路径
    */
   public async getFConfig() {
     try {
-      const explorer = cosmiconfig(`${EXTENSION_ALIAS}`, {
+      const explorer = cosmiconfig(`${TOOL_ALIAS}`, {
         stopDir: this.workspacePath,
       });
       const configResult = await explorer.search(this.workspacePath);
       if (configResult) {
+        loggingService.logInfo(
+          `读取配置文件${getFilename(configResult.filepath)}成功`
+        );
         this.fConfig = configResult.config;
         return configResult.filepath;
-      } else {
-        this.fConfig = { ...EXTEND_DEFAULT };
       }
     } catch (error) {
       loggingService.logError("读取配置文件失败", error);
     }
+    this.fConfig = { ...BASIC_CONFIG, ...EXT_CONFIG };
   }
 }
 

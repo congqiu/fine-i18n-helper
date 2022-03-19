@@ -1,64 +1,87 @@
-export const EXTENSION_ID = "fine-i18n-helper";
-export const EXTENSION_ALIAS = "i18n";
-export const EXTENSION_NAME = "国际化辅助工具";
+import { TBasicConfig, TExtConfiguration } from "./utils/types";
+
+export const TOOL_ID = "fine-i18n-helper";
+export const TOOL_ALIAS = "i18n";
+export const TOOL_NAME = "国际化辅助工具";
 
 export const COMMANDS = {
   i18nTransformWord: {
-    cmd: `${EXTENSION_ID}.i18nTransformWord`,
-    title: "翻译选中文字",
+    cmd: `${TOOL_ID}.i18nTransformWord`,
+    title: "转换选中文本",
   },
   i18nTransformFile: {
-    cmd: `${EXTENSION_ID}.i18nTransformFile`,
-    title: "翻译文件",
+    cmd: `${TOOL_ID}.i18nTransformFile`,
+    title: "转换当前文件",
   },
   i18nTransformWorkspace: {
-    cmd: `${EXTENSION_ID}.i18nTransformWorkspace`,
-    title: "翻译选中工作区",
+    cmd: `${TOOL_ID}.i18nTransformWorkspace`,
+    title: "转换当前工作区",
   },
   toggleShowI18n: {
-    cmd: `${EXTENSION_ID}.toggleShowI18n`,
-    title: "切换是否显示国际化信息",
-  },
-  exportI18nCSV: {
-    cmd: `${EXTENSION_ID}.exportI18nCSV`,
-    title: "导出未翻译文案为文件",
-  },
-  importI18nCSV: {
-    cmd: `${EXTENSION_ID}.importI18nCSV`,
-    title: "导入带有翻译文案的文件",
+    cmd: `${TOOL_ID}.toggleShowI18n`,
+    title: "切换国际化信息显隐",
   },
   changeI18nValue: {
-    cmd: `${EXTENSION_ID}.changeI18nValue`,
+    cmd: `${TOOL_ID}.changeI18nValue`,
     title: "修改国际化值",
   },
   openI18nFile: {
-    cmd: `${EXTENSION_ID}.openI18nFile`,
+    cmd: `${TOOL_ID}.openI18nFile`,
     title: "打开国际化文件",
   },
   changeWorkspace: {
-    cmd: `${EXTENSION_ID}.changeWorkspace`,
+    cmd: `${TOOL_ID}.changeWorkspace`,
     title: "切换国际化根目录",
   },
   findI18nInFile: {
-    cmd: `${EXTENSION_ID}.findI18nInFile`,
+    cmd: `${TOOL_ID}.findI18nInFile`,
     title: "查找当前文件国际化",
   },
-  openOutput: {
-    cmd: `${EXTENSION_ID}.openOutput`,
-    title: EXTENSION_ALIAS,
-  },
   initConfigFile: {
-    cmd: `${EXTENSION_ID}.initConfigFile`,
-    title: "创建配置文件",
+    cmd: `${TOOL_ID}.initConfigFile`,
+    title: "初始化国际化配置文件",
+  },
+  openOutput: {
+    cmd: `${TOOL_ID}.openOutput`,
+    title: TOOL_ALIAS,
+  },
+  changeLogLevel: {
+    cmd: `${TOOL_ID}.changeLogLevel`,
+    title: "修改日志等级",
+  },
+  reload: {
+    cmd: `${TOOL_ID}.reload`,
+    title: "重新加载",
+  },
+  exportI18nCSV: {
+    cmd: `${TOOL_ID}.exportI18nCSV`,
+    title: "导出未处理的国际化",
+  },
+  importI18nCSV: {
+    cmd: `${TOOL_ID}.importI18nCSV`,
+    title: "导入国际化",
   },
 };
 
-export const DOCUMENT_SELECTOR =  [
+export const DOCUMENT_SELECTOR = [
   { scheme: "file", language: "javascript" },
   { scheme: "file", language: "javascriptreact" },
   { scheme: "file", language: "typescript" },
   { scheme: "file", language: "typescriptreact" },
 ];
 
-export const DEFAULT_MAIN_LOCALES = "zh_CN.json";
-export const DEFAULT_JUDGE_TEXT =  /[\u4e00-\u9fa5]/;
+export const BASIC_CONFIG: TBasicConfig = {
+  localesPath: "src/locales",
+  mainLocale: "zh_CN.json",
+  functionName: "fineIntl.get",
+  prefix: "",
+};
+
+export const EXT_CONFIG: TExtConfiguration = {
+  entry: "src",
+  exclude: [],
+  decoratorsBeforeExport: true,
+  importLine: "",
+  judgeText: /[\u4e00-\u9fa5]/,
+  onlyExist: false
+};
