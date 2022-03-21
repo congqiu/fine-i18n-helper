@@ -19,18 +19,18 @@
 
 #### 通用配置项
 
-- localesPath: 国际化文件所在文件夹，默认为`src/locales`
-- locales: 支持的国际化文件，第一个为基准文件，如为空则文件夹第一个为基准文件
-- functionName: i18n的方法名，默认为`i18n.get`
+- localesPath: 国际化文件所在文件夹
+- mainLocale: 国际化基准文件
+- functionName: i18n的方法名
 - prefix: 国际化key的前缀，默认为空
 
 #### vscode专属配置项
 
 - multiRootTip: 是否显示Multi-root工作区提示，一般情况下不需要配置
-- hoverLocales: 定义hover显示的翻译值，默认或为空字符串显示全部，为null则不显示
+- hoverLocales: 定义hover显示的翻译值
 - showDecorations: 是否在当前文件显示key的翻译值
 - transformOnSave: 是否保存文件的时候自动翻译
-- definitions: 定义key可跳转的i18n文件，默认全部
+- definitions: 定义key可跳转的i18n文件
 
 ### 配置文件
 
