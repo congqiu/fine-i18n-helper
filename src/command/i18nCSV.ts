@@ -24,8 +24,8 @@ class I18nCSV {
     if (!editor || !locales) {
       return;
     }
-    const config = iConfig.config;
-    const workspacePath = iConfig.workspacePath;
+    const { config } = iConfig;
+    const { workspacePath } = iConfig;
     const mainLocalesData = getMainLocaleData(workspacePath, locales, config);
     const extname = getLocalesExtname(workspacePath, config);
     const filenames = getOtherLocaleFilenames(workspacePath, config).map(
@@ -67,10 +67,10 @@ class I18nCSV {
     if (!editor || !locales) {
       return;
     }
-    const workspacePath = iConfig.workspacePath;
-    const config = iConfig.config;
-    const document = editor.document;
-    const fsPath = document.uri.fsPath;
+    const { workspacePath } = iConfig;
+    const { config } = iConfig;
+    const { document } = editor;
+    const { fsPath } = document.uri;
     const language = getFilename(fsPath);
     const filename = language + getLocalesExtname(workspacePath, config);
     const mainLocalesData = getMainLocaleData(workspacePath, locales, config);

@@ -6,7 +6,13 @@ import * as vscode from "vscode";
 import { BASIC_CONFIG, COMMANDS } from "../constant";
 import { loggingService } from "../lib/loggingService";
 
-import { TWLocales, TVsConfiguration, TWorkspacesLocales, TLocales, TBasicConfig } from "./types";
+import {
+  TWLocales,
+  TVsConfiguration,
+  TWorkspacesLocales,
+  TLocales,
+  TBasicConfig,
+} from "./types";
 
 import { getFilename, getJSON, mkdirsSync, sortJSON } from ".";
 
@@ -97,7 +103,7 @@ export function getWorkspacesLocales(config: TVsConfiguration) {
 
   for (let i = 0; i < workspaceFolders.length; i++) {
     try {
-      const fsPath = workspaceFolders[i].uri.fsPath;
+      const { fsPath } = workspaceFolders[i].uri;
       const localesPath = path.join(fsPath, config.localesPath);
       const data = getLocalesData(localesPath);
       if (data) {
@@ -174,7 +180,7 @@ export function getOtherLocaleFilenames(
 ) {
   const localesPath = getWLocalesPath(workspacePath, config.localesPath);
   const mainFilename = getMainLocaleFilename(workspacePath, config);
-  return fs.readdirSync(localesPath).filter(f => f !== mainFilename);
+  return fs.readdirSync(localesPath).filter((f) => f !== mainFilename);
 }
 
 /**

@@ -28,11 +28,10 @@ export function getFilename(filePath: string, ext = false) {
 export function mkdirsSync(dirname: string) {
   if (fs.existsSync(dirname)) {
     return true;
-  } else {
-    if (mkdirsSync(path.dirname(dirname))) {
-      fs.mkdirSync(dirname);
-      return true;
-    }
+  }
+  if (mkdirsSync(path.dirname(dirname))) {
+    fs.mkdirSync(dirname);
+    return true;
   }
 }
 
@@ -210,7 +209,7 @@ export function autoTranslateText(
   options: translate.IOptions = {}
 ) {
   const { from = "zh-CN", to = "en", ...other } = options;
-  // todo 切换翻译源
+  // todo 支持切换翻译源
   return new Promise<string>((resolve, reject) => {
     translate(text, { from, to, ...other })
       .then((res: { text: string }) => {
@@ -220,7 +219,7 @@ export function autoTranslateText(
           const result =
             prefix +
             res.text
-              .replace(/\b(\w)(\w*)/g, function ($0, $1, $2) {
+              .replace(/\b(\w)(\w*)/g, ($0, $1, $2) => {
                 return $1.toUpperCase() + $2.toLowerCase();
               })
               .replace(/\s+/g, "_")
@@ -229,7 +228,7 @@ export function autoTranslateText(
           resolve(result);
         }
       })
-      .catch((err: any) => {
+      .catch((err: unknown) => {
         reject(err);
       });
   });

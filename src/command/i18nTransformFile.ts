@@ -8,7 +8,12 @@ import { iConfig } from "../configuration";
 import { loggingService } from "../lib/loggingService";
 import { iLocales } from "../locales";
 import { getEntryFiles, getFilename } from "../utils";
-import { createLocalesFolder, getMainLocaleData, getMainLocalePath, updateLocaleData } from "../utils/locale";
+import {
+  createLocalesFolder,
+  getMainLocaleData,
+  getMainLocalePath,
+  updateLocaleData,
+} from "../utils/locale";
 import { Transform } from "../utils/transform";
 import { TLocales, TVsConfiguration } from "../utils/types";
 import { showErrorMessageTip } from "../utils/vscode";
@@ -25,9 +30,9 @@ export class I18nTransformFile {
     if (!editor) {
       return;
     }
-    const config = iConfig.config;
+    const { config } = iConfig;
 
-    const workspacePath = iConfig.workspacePath;
+    const { workspacePath } = iConfig;
 
     if (
       !this.checkLocalesPath(workspacePath, config.localesPath, () => {
@@ -52,7 +57,7 @@ export class I18nTransformFile {
     const onlyExist = handleResult === "只处理国际化文件中已有的文案";
     const isExtract = handleResult === "只收集原始文案到国际化文件中";
 
-    const wLocales = iLocales.wLocales;
+    const { wLocales } = iLocales;
     const locales = wLocales
       ? getMainLocaleData(workspacePath, wLocales, config)
       : {};
@@ -106,7 +111,7 @@ export class I18nTransformFile {
               }
             }
           } catch (error) {
-            const msg = getFilename(filepath) + "处理失败";
+            const msg = `${getFilename(filepath)}处理失败`;
             // 第一次报错用error级别，防止错误信息过多
             hasFail
               ? loggingService.logDebug(msg, error)
@@ -135,10 +140,10 @@ export class I18nTransformFile {
     if (!editor) {
       return;
     }
-    const document = editor.document;
-    const config = iConfig.config;
+    const { document } = editor;
+    const { config } = iConfig;
 
-    const workspacePath = iConfig.workspacePath;
+    const { workspacePath } = iConfig;
 
     if (
       !this.checkLocalesPath(workspacePath, config.localesPath, () => {
@@ -148,13 +153,13 @@ export class I18nTransformFile {
       return;
     }
 
-    const wLocales = iLocales.wLocales;
+    const { wLocales } = iLocales;
     const locales = wLocales
       ? getMainLocaleData(workspacePath, wLocales, config)
       : {};
 
     const filepath = document.uri.fsPath;
-    
+
     await window.withProgress(
       {
         location: ProgressLocation.Notification,
@@ -178,14 +183,14 @@ export class I18nTransformFile {
             });
           }
           const { newLocales, outputCode } = result;
-    
+
           progress.report({
             increment: 99,
             message: "正在将国际化数据写入国际化文件中",
           });
 
           this.addLocalesToFile(workspacePath, config, newLocales);
-    
+
           editor.edit((editBuilder) => {
             editBuilder.replace(
               new Selection(
@@ -195,7 +200,7 @@ export class I18nTransformFile {
               outputCode
             );
           });
-    
+
           window.showInformationMessage("文件内容转换完成！");
           loggingService.logDebug(`${filepath}文件内容转换完成！`);
         } catch (error) {
@@ -203,7 +208,10 @@ export class I18nTransformFile {
             increment: 100,
             message: "文件内容转换失败",
           });
-          showErrorMessageTip(`文件内容转换失败，详细信息请查看输出日志`, error);
+          showErrorMessageTip(
+            `文件内容转换失败，详细信息请查看输出日志`,
+            error
+          );
         }
 
         return new Promise<void>((resolve) => {

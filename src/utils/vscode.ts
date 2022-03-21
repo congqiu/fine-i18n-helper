@@ -9,7 +9,6 @@ import { TLocales, TVsConfiguration } from "./types";
 
 import { coverFnNameToRegExp, coverPrefixToRegExp, getKeyPosition } from ".";
 
-
 /**
  * 获取当前文件所在工作区
  * @deprecated 直接使用i18nConfig.workspacePath
@@ -17,7 +16,7 @@ import { coverFnNameToRegExp, coverPrefixToRegExp, getKeyPosition } from ".";
  * @returns
  */
 export function getCurrentWorkspace(document: vscode.TextDocument) {
-  const fileName = document.fileName;
+  const { fileName } = document;
   const workspaceFolders = vscode.workspace.workspaceFolders || [];
   return workspaceFolders.find(
     (item) => fileName.indexOf(item.uri.fsPath) > -1

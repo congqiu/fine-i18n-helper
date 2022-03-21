@@ -8,13 +8,13 @@ import { getI18nRange } from "../utils/vscode";
 
 export class I18nHoverProvider implements HoverProvider {
   async provideHover(document: TextDocument, position: Position) {
-    const config = iConfig.config;
-    const wLocales = iLocales.wLocales;
+    const { config } = iConfig;
+    const { wLocales } = iLocales;
     if (config.hoverLocales === null || !config.functionName || !wLocales) {
       return;
     }
 
-    const workspacePath = iConfig.workspacePath;
+    const { workspacePath } = iConfig;
     const matchRange = getI18nRange(document, position, config);
     if (matchRange) {
       const i18nKey = document.getText(matchRange);

@@ -17,7 +17,12 @@ import { iEvents } from "../lib/i18nEvents";
 import { loggingService, LOG_LEVEL, TLogLevel } from "../lib/loggingService";
 import { iLocales } from "../locales";
 import { getKeyPosition } from "../utils";
-import { getLocaleFilepath, updateLocaleData, getMainLocaleFilename, getMainLocaleData } from "../utils/locale";
+import {
+  getLocaleFilepath,
+  updateLocaleData,
+  getMainLocaleFilename,
+  getMainLocaleData,
+} from "../utils/locale";
 import { getI18nRangesInfo } from "../utils/vscode";
 
 export interface TOpenI18nFileArgs {
@@ -53,7 +58,7 @@ export const openI18nFile = (args: TOpenI18nFileArgs) => {
     preview: false,
   });
   loggingService.logDebug(
-    `打开国际化文件${filename}${key ? "，定位于" + key + "上" : ""}`
+    `打开国际化文件${filename}${key ? `，定位于${key}上` : ""}`
   );
 };
 
@@ -74,9 +79,10 @@ export const selectWorkspace = (
         }
       )
       .then(async (val) => {
-        if (val) {
+        const folder = workspaceFolders.find((w) => w.name === val);
+        if (folder) {
           const configPath = await iConfig.updateWorkspacePath(
-            workspaceFolders.find((w) => w.name === val)!.uri.fsPath
+            folder.uri.fsPath
           );
           iEvents.watchConfigurationFile(configPath);
           loggingService.logDebug(`选择了${val}作为新的工作区`);
@@ -102,8 +108,8 @@ export const changeI18nValue = (args: TChangeI18nValueArgs) => {
   if (!editor || !locales) {
     return;
   }
-  const config = iConfig.config;
-  const workspacePath = iConfig.workspacePath;
+  const { config } = iConfig;
+  const { workspacePath } = iConfig;
   window
     .showInputBox({
       title: `修改${key}对应的中文`,
@@ -140,8 +146,8 @@ export const findI18nInFile = () => {
   if (!editor || !iLocales.wLocales) {
     return;
   }
-  const document = editor.document;
-  const config = iConfig.config;
+  const { document } = editor;
+  const { config } = iConfig;
   const rangeInfo = getI18nRangesInfo(
     document,
     config.functionName,

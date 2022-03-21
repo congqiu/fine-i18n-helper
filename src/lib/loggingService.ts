@@ -9,7 +9,7 @@ export type TLogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR" | "NONE";
 export class LoggingService {
   private outputChannel = window.createOutputChannel(TOOL_ALIAS);
 
-  private logLevel: TLogLevel = "DEBUG";
+  private logLevel: TLogLevel = "INFO";
 
   public setLogLevel(logLevel: TLogLevel) {
     this.logLevel = logLevel;
@@ -75,4 +75,3 @@ export class LoggingService {
 }
 
 export const loggingService = new LoggingService();
-

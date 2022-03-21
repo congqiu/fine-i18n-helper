@@ -7,7 +7,7 @@ import { getI18nRange, getKeyLocations } from "../utils/vscode";
 
 export class I18nDefinitionProvider implements DefinitionProvider {
   async provideDefinition(document: TextDocument, position: Position) {
-    const config = iConfig.config;
+    const { config } = iConfig;
     if (!config?.functionName || !iLocales.wLocales) {
       return;
     }

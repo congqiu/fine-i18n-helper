@@ -21,10 +21,10 @@ export class I18nTransformWord {
     if (!editor) {
       return;
     }
-    const document = editor.document;
-    const selection = editor.selection;
-    const config = iConfig.config;
-    const workspacePath = iConfig.workspacePath;
+    const { document } = editor;
+    const { selection } = editor;
+    const { config } = iConfig;
+    const { workspacePath } = iConfig;
 
     if (!iLocales.check(workspacePath)) {
       const res = await window.showInformationMessage(
@@ -51,9 +51,13 @@ export class I18nTransformWord {
       });
       loggingService.logDebug(`开始转换'${text}'`);
       const result = await transformText(text, wLocales, config.prefix);
+
       loggingService.logDebug(
-        `'${text}'的key获取结束，${result.add ? "自动翻译" : "从文件中获取"}的key为${result.key}`
+        `'${text}'的key获取结束，${
+          result.add ? "自动翻译" : "从文件中获取"
+        }的key为${result.key}`
       );
+
       const key = await window.showInputBox({
         title: `确认"${text}"的key`,
         prompt: text,

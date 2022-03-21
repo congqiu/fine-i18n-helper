@@ -13,8 +13,9 @@
   "publisher": "Fine",
   "repository": {
     "type": "git",
-    "url": "git"
+    "url": "https://github.com/congqiu/fine-i18n-helper.git"
   },
+  "homepage": "https://github.com/congqiu/fine-i18n-helper",
   "engines": {
     "vscode": "^1.63.0"
   },
@@ -208,17 +209,26 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "yarn clean && yarn esbuild-base -- --minify",
-    "lint": "eslint src --ext ts",
+    "prepare": "husky install",
+    "vscode:prepublish": "yarn clean && yarn esbuild-base --minify",
+    "lint": "eslint src --fix --ext ts",
     "compile": "tsc -p ./",
     "watch:tsc": "tsc -watch -p ./",
     "pretest": "yarn compile && yarn lint",
     "test": "node ./out/test/runTest.js",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
-    "esbuild": "yarn esbuild-base -- --sourcemap",
     "clean": "rimraf out/",
-    "watch": "yarn esbuild-base -- --sourcemap --watch",
-    "build": "vsce package"
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "yarn esbuild-base --sourcemap",
+    "watch": "yarn esbuild-base --sourcemap --watch",
+    "build": "vsce package --yarn"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,json,less}": [
+      "prettier --write"
+    ],
+    "src/**/*.{js,ts}": [
+      "eslint"
+    ]
   },
   "devDependencies": {
     "@types/babel__core": "^7.1.18",
@@ -232,8 +242,12 @@
     "@vscode/test-electron": "^1.6.2",
     "esbuild": "^0.14.19",
     "eslint": "^8.1.0",
+    "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-unused-imports": "^2.0.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.7",
     "mocha": "^9.1.3",
     "rimraf": "^3.0.2",
     "typescript": "^4.4.4"

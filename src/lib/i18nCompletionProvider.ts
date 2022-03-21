@@ -9,8 +9,8 @@ export class I18nCompletionItemProvider implements CompletionItemProvider {
     const lineText = document.lineAt(position).text;
     const linePrefix = lineText.substring(0, position.character);
 
-    const config = iConfig.config;
-    const workspacePath = iConfig.workspacePath;
+    const { config } = iConfig;
+    const { workspacePath } = iConfig;
 
     // 如果当前位置不是在国际化方法之后不进行提示
     if (

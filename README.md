@@ -37,3 +37,11 @@
 支持`i18n.config.js`或`.i18nrc`或`.i18nrc.json`或`.i18nrc.yml`等[cosmiconfig](https://github.com/davidtheclark/cosmiconfig)风格的配置文件，同一配置文件可以直接修改生效，如果配置文件类型发生改变请重启工程。
 
 可以通过命令面板执行`初始化国际化配置文件`来初始化一个默认的配置文件。
+
+## 开发
+
+```sh
+git clone https://github.com/congqiu/fine-i18n-helper.git
+```
+
+下载代码，安装依赖后，执行`yarn watch`，再使用vscode调用F5即可进入调试模式。更多信息参考[vsc-extension-quickstart](vsc-extension-quickstart.md)或[官方文档](https://code.visualstudio.com/api)了解VS Code的extension开发。

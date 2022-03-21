@@ -19,7 +19,7 @@ export class I18nDecorations {
   init(context: vscode.ExtensionContext) {
     let timeout: NodeJS.Timer | undefined = undefined;
 
-    const triggerUpdateDecorations = (throttle: boolean = false) => {
+    const triggerUpdateDecorations = (throttle = false) => {
       if (timeout) {
         clearTimeout(timeout);
         timeout = undefined;
@@ -69,7 +69,7 @@ export class I18nDecorations {
 
   // 更新
   updateDecorations() {
-    const config = iConfig.config;
+    const { config } = iConfig;
     const document = this.activeEditor?.document;
     if (!document || !config.showDecorations || !iLocales.wLocales) {
       this.clear();

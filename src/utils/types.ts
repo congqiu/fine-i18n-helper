@@ -25,7 +25,6 @@ export type TVsConfiguration = TBasicConfig & {
   watchMode: boolean;
 };
 
-
 // 国际化数据{key: value}
 export interface TLocales {
   [key: string]: string;

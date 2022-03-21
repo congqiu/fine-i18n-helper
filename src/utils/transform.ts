@@ -12,7 +12,6 @@ import { TConfiguration, TLocales } from "./types";
 
 import { autoTranslateText } from ".";
 
-
 interface TPathInfo {
   text: string;
   path: babel.NodePath<t.Node>;
@@ -93,7 +92,7 @@ export class Transform {
       },
       CallExpression(path) {
         // 跳过已经被国际化函数处理的内容
-        const callee = path.node.callee;
+        const { callee } = path.node;
         const functionNames = functionName.split(".").reverse();
         const isIdentifierName = functionNames.length === 1;
 
@@ -107,7 +106,8 @@ export class Transform {
                 if (t.isMemberExpression(obj.object)) {
                   obj = { ...obj.object };
                   return true;
-                } else if (
+                }
+                if (
                   t.isIdentifier(obj.object) &&
                   obj.object.name === latestIdentifier
                 ) {
@@ -141,7 +141,7 @@ export class Transform {
         ) {
           const nodes = ([] as any[])
             .concat(path.node.quasis, path.node.expressions)
-            .sort(function (a, b) {
+            .sort((a, b) => {
               return a.start - b.start;
             });
           let hasI18n = false;
@@ -149,7 +149,7 @@ export class Transform {
           const vars: TPathInfo["vars"] = [];
           nodes.forEach((node) => {
             if (t.isTemplateElement(node)) {
-              const cooked = node.value.cooked;
+              const { cooked } = node.value;
               text += `${replaceLineBreak(cooked)}`;
               if (hasI18nText(judgeText, cooked)) {
                 hasI18n = true;
@@ -189,7 +189,11 @@ export class Transform {
         ...config,
         isTsx: path.extname(filepath) === ".tsx",
       })
-    )!;
+    );
+
+    if (!ast) {
+      return;
+    }
 
     const texts: TPathInfo[] = [];
     let hasTransformed = false;
@@ -249,29 +253,31 @@ export class Transform {
    * @returns
    */
   public extract(filepath: string, config: TConfiguration) {
+    const texts: TExtractText[] = [];
+
     const ast = babel.parseSync(
       fs.readFileSync(filepath).toString(),
       this.getParseOption({
         ...config,
         isTsx: path.extname(filepath) === ".tsx",
       })
-    )!;
+    );
 
-    const texts: TExtractText[] = [];
-
-    this.traverse(ast, config, (info) => {
-      texts.push({
-        text: info.text,
-        start: info.path.node.loc?.start || {
-          line: 0,
-          column: 0,
-        },
-        end: info.path.node.loc?.end || {
-          line: 0,
-          column: 0,
-        },
+    if (ast) {
+      this.traverse(ast, config, (info) => {
+        texts.push({
+          text: info.text,
+          start: info.path.node.loc?.start || {
+            line: 0,
+            column: 0,
+          },
+          end: info.path.node.loc?.end || {
+            line: 0,
+            column: 0,
+          },
+        });
       });
-    });
+    }
 
     return texts;
   }
@@ -283,20 +289,29 @@ export class Transform {
    * @param prefix
    * @returns
    */
-  public async handleTexts(texts: any[], locales: TLocales, prefix: string) {
-    const localesMap = new Map();
+  public async handleTexts(
+    texts: TExtractText[],
+    locales: TLocales,
+    prefix: string
+  ) {
+    const localesMap = new Map<string, string>();
     Object.keys(locales).forEach((key) => localesMap.set(locales[key], key));
+    const handledTexts: { text: string; key: string; exist: boolean }[] = [];
 
     for (let i = 0; i < texts.length; i++) {
-      if (!localesMap.has(texts[i].text)) {
-        const key = await autoTranslateText(texts[i].text, prefix);
-        texts[i].key = key;
-        texts[i].exist = false;
+      const handledText = { ...texts[i] };
+      const { text } = handledText;
+      if (localesMap.has(text)) {
+        handledTexts.push({
+          ...handledText,
+          key: localesMap.get(text)!,
+          exist: true,
+        });
       } else {
-        texts[i].key = localesMap.get(texts[i].text);
-        texts[i].exist = true;
+        const key = await autoTranslateText(text, prefix);
+        handledTexts.push({ ...handledText, key, exist: false });
       }
     }
-    return texts;
+    return handledTexts;
   }
 }

@@ -15,15 +15,15 @@ export const generateI18nFunction = (functionName: string) => {
   }, t.identifier(functionNames[0]));
 };
 
-export const replaceLineBreak = function (value?: string) {
+export const replaceLineBreak = (value?: string) => {
   return value?.replace(/[\n]/g, "\\n") || "";
 };
 
-export const hasI18nText = function (judgeText: RegExp, text?: string) {
+export const hasI18nText = (judgeText: RegExp, text?: string) => {
   return text ? judgeText.test(text) : false;
 };
 
-export const getJudgeText = function (judgeText: RegExp | string) {
+export const getJudgeText = (judgeText: RegExp | string) => {
   if (typeof judgeText === "string") {
     try {
       return new RegExp(escapeForRegExp(judgeText));

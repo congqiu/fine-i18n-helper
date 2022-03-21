@@ -7,7 +7,6 @@ import { loggingService } from "./lib/loggingService";
 import { getFilename } from "./utils";
 import { TConfiguration, TVsConfiguration } from "./utils/types";
 
-
 const VS_CONFIG = {
   ...BASIC_CONFIG,
   multiRootTip: true,
@@ -74,7 +73,10 @@ class I18nConfig {
    * @param section 配置项名称
    * @param value 配置项值
    */
-  public async updateVsConfig(section: string, value: any) {
+  public async updateVsConfig<T extends keyof TVsConfiguration>(
+    section: T,
+    value: TVsConfiguration[T]
+  ) {
     const config = workspace.getConfiguration(TOOL_ID);
     await config.update(section, value);
   }

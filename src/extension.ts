@@ -31,11 +31,12 @@ import { iLocales } from "./locales";
 export async function activate(context: vscode.ExtensionContext) {
   loggingService.logInfo(`Extension Name: ${TOOL_NAME}.`);
   loggingService.logInfo(
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     `Extension Version: ${require("../package.json").version}`
   );
 
   // 工作区检测
-  const workspaceFolders = vscode.workspace.workspaceFolders;
+  const { workspaceFolders } = vscode.workspace;
   if (!workspaceFolders?.length) {
     loggingService.logError(`${TOOL_NAME}目前只支持在工作区环境下使用`);
     return;
@@ -214,4 +215,6 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+  // 清除所有的订阅
+}

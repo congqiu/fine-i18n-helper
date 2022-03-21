@@ -11,7 +11,11 @@ import { i18nTransformFile } from "../command/i18nTransformFile";
 import { iConfig } from "../configuration";
 import { iLocales } from "../locales";
 import { getJSON } from "../utils";
-import { getMainLocaleData, getMainLocalePath, removeOtherLocales } from "../utils/locale";
+import {
+  getMainLocaleData,
+  getMainLocalePath,
+  removeOtherLocales,
+} from "../utils/locale";
 import { isTargetLanguages } from "../utils/vscode";
 
 export class I18nEvents {
@@ -36,12 +40,15 @@ export class I18nEvents {
     this.transformFileOnSave(context);
   }
 
+  /**
+   * 保存主国际化文件的提示
+   */
   public saveMainLocaleTip() {
     workspace.onWillSaveTextDocument(
       (e) => {
-        const config = iConfig.config;
-        const document = e.document;
-        const workspacePath = iConfig.workspacePath;
+        const { config } = iConfig;
+        const { document } = e;
+        const { workspacePath } = iConfig;
         if (
           document.isDirty &&
           iLocales.wLocales &&
@@ -80,11 +87,17 @@ export class I18nEvents {
     );
   }
 
+  /**
+   * 配置项更新后进行重新加载
+   */
   public reloadByConfig() {
     this.watchLocalesFile();
     this.transformFileOnSave();
   }
 
+  /**
+   * 监听locales中的文件
+   */
   public watchLocalesFile() {
     if (iConfig.config.watchMode) {
       this.localesFileWatcher = workspace.createFileSystemWatcher(
@@ -99,6 +112,10 @@ export class I18nEvents {
     }
   }
 
+  /**
+   * transformOnSave开启的情况下文件保存时自动转换
+   * @param context
+   */
   public transformFileOnSave(context?: ExtensionContext) {
     if (iConfig.config.transformOnSave) {
       this.transformFileOnSaveDisposable = workspace.onWillSaveTextDocument(
@@ -119,6 +136,11 @@ export class I18nEvents {
     }
   }
 
+  /**
+   * 监听配置文件变化
+   * @param filepath 文件路径
+   * @param dispose
+   */
   public watchConfigurationFile(filepath?: string, dispose = false) {
     this.configFileWatcher?.dispose();
     if (filepath && !dispose) {

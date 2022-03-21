@@ -1,7 +1,5 @@
 # Change Log
 
-All notable changes to the "fine-i18n-helper" extension will be documented in this file.
+## [0.0.1]
 
-## [Unreleased]
-
-- Initial release
+- 发布基本功能
