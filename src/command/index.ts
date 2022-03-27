@@ -57,7 +57,7 @@ export const openI18nFile = (args: TOpenI18nFileArgs) => {
     selection: new Range(position, position),
     preview: false,
   });
-  loggingService.logDebug(
+  loggingService.debug(
     `打开国际化文件${filename}${key ? `，定位于${key}上` : ""}`
   );
 };
@@ -85,7 +85,7 @@ export const selectWorkspace = (
             folder.uri.fsPath
           );
           iEvents.watchConfigurationFile(configPath);
-          loggingService.logDebug(`选择了${val}作为新的工作区`);
+          loggingService.info(`选择了${val}作为新的工作区`);
         }
       });
   }
@@ -133,7 +133,7 @@ export const changeI18nValue = (args: TChangeI18nValueArgs) => {
         );
       });
       iLocales.reload();
-      loggingService.logDebug(`${key}对应的文案从'${text}'修改为'${value}'`);
+      loggingService.debug(`${key}对应的文案从'${text}'修改为'${value}'`);
     });
 };
 
@@ -199,14 +199,14 @@ export const initConfigFile = async () => {
     )
   );
   window.showTextDocument(Uri.file(filepath), {});
-  loggingService.logInfo(`配置文件${filename}写入成功`);
+  loggingService.info(`配置文件${filename}写入成功`);
 };
 
 export const changeLogLevel = () => {
   window.showQuickPick(LOG_LEVEL).then((val) => {
     if (val) {
       loggingService.setLogLevel(val as TLogLevel);
-      loggingService.logInfo(`日志等级切换为${val}`);
+      loggingService.info(`日志等级切换为${val}`);
     }
   });
 };

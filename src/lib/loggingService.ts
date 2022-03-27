@@ -15,28 +15,28 @@ export class LoggingService {
     this.logLevel = logLevel;
   }
 
-  public logDebug(message: string, data?: unknown) {
+  public debug(message: string, data?: unknown) {
     this.logMessage(message, "DEBUG");
     if (data) {
       this.logObject(data);
     }
   }
 
-  public logInfo(message: string, data?: unknown) {
+  public info(message: string, data?: unknown) {
     this.logMessage(message, "INFO");
     if (data) {
       this.logObject(data);
     }
   }
 
-  public logWarning(message: string, data?: unknown) {
+  public warning(message: string, data?: unknown) {
     this.logMessage(message, "WARN");
     if (data) {
       this.logObject(data);
     }
   }
 
-  public logError(message: string, error?: unknown) {
+  public error(message: string, error?: unknown) {
     this.logMessage(message, "ERROR");
     if (typeof error === "string") {
       this.outputChannel.appendLine(error);
@@ -62,9 +62,6 @@ export class LoggingService {
   }
 
   private logMessage(message: string, logLevel: TLogLevel) {
-    // todo delete
-    // eslint-disable-next-line no-console
-    console.log(message);
     const LEVEL = ["DEBUG", "INFO", "WARN", "ERROR", "NONE"];
     if (LEVEL.slice(LEVEL.indexOf(logLevel) + 1).includes(this.logLevel)) {
       return;

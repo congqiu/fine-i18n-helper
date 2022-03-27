@@ -74,7 +74,7 @@ export function coverFnNameToRegExp(fnName: string) {
   try {
     return new RegExp(str, "gm");
   } catch (error) {
-    loggingService.logError(
+    loggingService.error(
       `${TOOL_NAME}配置项functionName转换成正则出错，${error}`
     );
     return;
@@ -92,7 +92,7 @@ export function coverPrefixToRegExp(prefix: string) {
   try {
     return new RegExp(str, "g");
   } catch (error) {
-    loggingService.logError(`${TOOL_NAME}配置项prefix转换成正则出错，${error}`);
+    loggingService.error(`${TOOL_NAME}配置项prefix转换成正则出错，${error}`);
     return;
   }
 }
@@ -143,7 +143,7 @@ export function getKeyPosition(filepath: string, key: string) {
     }
     return position.line !== -1 ? position : undefined;
   } catch (error) {
-    loggingService.logError("获取key所在文件位置失败", error);
+    loggingService.error("获取key所在文件位置失败", error);
   }
 }
 

@@ -29,8 +29,8 @@ import { iLocales } from "./locales";
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
-  loggingService.logInfo(`Extension Name: ${TOOL_NAME}.`);
-  loggingService.logInfo(
+  loggingService.info(`Extension Name: ${TOOL_NAME}.`);
+  loggingService.info(
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     `Extension Version: ${require("../package.json").version}`
   );
@@ -38,7 +38,7 @@ export async function activate(context: vscode.ExtensionContext) {
   // 工作区检测
   const { workspaceFolders } = vscode.workspace;
   if (!workspaceFolders?.length) {
-    loggingService.logError(`${TOOL_NAME}目前只支持在工作区环境下使用`);
+    loggingService.warning(`${TOOL_NAME}目前只支持在工作区环境下使用`);
     return;
   }
   const configPath = await iConfig.updateWorkspacePath(
@@ -211,7 +211,7 @@ export async function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  loggingService.logInfo(`${TOOL_NAME}配置完成！`);
+  loggingService.info(`${TOOL_NAME}配置完成！`);
 }
 
 // this method is called when your extension is deactivated

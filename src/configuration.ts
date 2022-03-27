@@ -92,14 +92,14 @@ class I18nConfig {
       });
       const configResult = await explorer.search(this.workspacePath);
       if (configResult) {
-        loggingService.logInfo(
+        loggingService.info(
           `读取配置文件${getFilename(configResult.filepath)}成功`
         );
         this.fConfig = configResult.config;
         return configResult.filepath;
       }
     } catch (error) {
-      loggingService.logError("读取配置文件失败", error);
+      loggingService.error("读取配置文件失败", error);
     }
     this.fConfig = { ...BASIC_CONFIG, ...EXT_CONFIG };
   }

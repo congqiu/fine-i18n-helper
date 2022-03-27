@@ -49,10 +49,10 @@ export class I18nTransformWord {
         quote = p1;
         return p2;
       });
-      loggingService.logDebug(`开始转换'${text}'`);
+      loggingService.debug(`开始转换'${text}'`);
       const result = await transformText(text, wLocales, config.prefix);
 
-      loggingService.logDebug(
+      loggingService.debug(
         `'${text}'的key获取结束，${
           result.add ? "自动翻译" : "从文件中获取"
         }的key为${result.key}`
@@ -64,7 +64,7 @@ export class I18nTransformWord {
         value: result.key,
       });
       if (!key) {
-        loggingService.logDebug(`'${text}'转换未完成，用户取消或没有获取到key`);
+        loggingService.debug(`'${text}'转换未完成，用户取消或没有获取到key`);
         return;
       }
       if (result.add) {
@@ -79,7 +79,7 @@ export class I18nTransformWord {
           `${config.functionName}(${quote}${key}${quote})`
         );
       });
-      loggingService.logDebug(`'${text}'转换完成，当前key为${key}`);
+      loggingService.debug(`'${text}'转换完成，当前key为${key}`);
     } catch (error) {
       showErrorMessageTip(`转换选中文本失败，详细信息请查看输出日志`, error);
     }

@@ -114,8 +114,8 @@ export class I18nTransformFile {
             const msg = `${getFilename(filepath)}处理失败`;
             // 第一次报错用error级别，防止错误信息过多
             hasFail
-              ? loggingService.logDebug(msg, error)
-              : loggingService.logError(msg, error);
+              ? loggingService.debug(msg, error)
+              : loggingService.error(msg, error);
           }
         }
 
@@ -176,7 +176,7 @@ export class I18nTransformFile {
             config,
           });
           if (!result) {
-            loggingService.logDebug(`${filepath}无需再次进行转换`);
+            loggingService.debug(`${filepath}无需再次进行转换`);
             window.showInformationMessage("未找到需要转换的内容");
             return new Promise<void>((resolve) => {
               resolve();
@@ -202,7 +202,7 @@ export class I18nTransformFile {
           });
 
           window.showInformationMessage("文件内容转换完成！");
-          loggingService.logDebug(`${filepath}文件内容转换完成！`);
+          loggingService.debug(`${filepath}文件内容转换完成！`);
         } catch (error) {
           progress.report({
             increment: 100,
@@ -227,7 +227,7 @@ export class I18nTransformFile {
     cb: () => void
   ) {
     if (!iLocales.check(workspacePath)) {
-      loggingService.logDebug(`当前工作区未检测到${localesPath}文件夹`);
+      loggingService.debug(`当前工作区未检测到${localesPath}文件夹`);
       const res = await window.showInformationMessage(
         `当前工作区未检测到${localesPath}文件夹，是否创建文件夹并继续执行？`,
         { modal: true },
@@ -235,7 +235,7 @@ export class I18nTransformFile {
       );
       if (res === "创建") {
         createLocalesFolder(workspacePath, localesPath);
-        loggingService.logDebug(`新建${localesPath}文件夹并继续！`);
+        loggingService.debug(`新建${localesPath}文件夹并继续！`);
         cb();
       }
       return false;

@@ -48,7 +48,7 @@ class I18nCSV {
             mainLocalesData,
             languageData
           );
-          loggingService.logInfo(
+          loggingService.info(
             `${language}.csv导出完成，请检查工作区目录下csv文件`
           );
         } catch (error) {
@@ -57,7 +57,7 @@ class I18nCSV {
       });
       showInfoMessage("导出完成，请检查工作区目录下csv文件");
     } else {
-      loggingService.logDebug("未获得导出的文件名");
+      loggingService.debug("未获得导出的文件名");
     }
   }
 

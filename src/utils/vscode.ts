@@ -15,13 +15,13 @@ import { coverFnNameToRegExp, coverPrefixToRegExp, getKeyPosition } from ".";
  * @param document
  * @returns
  */
-export function getCurrentWorkspace(document: vscode.TextDocument) {
+export const getCurrentWorkspace = (document: vscode.TextDocument) => {
   const { fileName } = document;
   const workspaceFolders = vscode.workspace.workspaceFolders || [];
   return workspaceFolders.find(
     (item) => fileName.indexOf(item.uri.fsPath) > -1
   );
-}
+};
 
 /**
  * 根据配置获取匹配的文字范围
@@ -92,11 +92,11 @@ export const getI18nRangesInfo = (
  * @param paths i18n文件路径数组
  * @returns
  */
-export function getKeyLocations(
+export const getKeyLocations = (
   key: string,
   wLocalesPath: string,
   paths: string[]
-) {
+) => {
   const locations = [];
   try {
     for (let i = 0; i < paths.length; i++) {
@@ -112,11 +112,11 @@ export function getKeyLocations(
       }
     }
   } catch (error) {
-    loggingService.logError("返回key在i18n文件中的位置失败", error);
+    loggingService.error("返回key在i18n文件中的位置失败", error);
   }
 
   return locations;
-}
+};
 
 export const isTargetLanguages = (language: string) => {
   return [
@@ -128,7 +128,7 @@ export const isTargetLanguages = (language: string) => {
 };
 
 export const showErrorMessageTip = (message: string, error?: unknown) => {
-  loggingService.logError(message, error);
+  loggingService.error(message, error);
   vscode.window.showErrorMessage(message, "查看输出日志").then((v) => {
     if (v === "查看输出日志") {
       vscode.commands.executeCommand(COMMANDS.openOutput.cmd);
@@ -137,6 +137,11 @@ export const showErrorMessageTip = (message: string, error?: unknown) => {
 };
 
 export const showInfoMessage = (message: string, data?: unknown) => {
-  loggingService.logInfo(message, data);
+  loggingService.info(message, data);
+  vscode.window.showInformationMessage(message);
+};
+
+export const showDebugMessage = (message: string, data?: unknown) => {
+  loggingService.debug(message, data);
   vscode.window.showInformationMessage(message);
 };

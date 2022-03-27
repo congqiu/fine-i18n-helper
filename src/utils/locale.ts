@@ -35,7 +35,7 @@ export function getLocaleFilenamesByConfig(
     }
     return filenames;
   } catch (error) {
-    loggingService.logError("根据配置获取定义的i18n文件列表失败", error);
+    loggingService.error("根据配置获取定义的i18n文件列表失败", error);
   }
   return [];
 }
@@ -82,7 +82,7 @@ export function getLocalesData(localesFolder: string) {
       const value = getJSON(fs.readFileSync(filePath).toString("utf8"));
       locales[filename] = value;
     } catch (error) {
-      loggingService.logError("读取i18n文件数据失败", error);
+      loggingService.error("读取i18n文件数据失败", error);
     }
   });
 
@@ -110,12 +110,12 @@ export function getWorkspacesLocales(config: TVsConfiguration) {
         workspacesLocales[fsPath] = data;
       }
     } catch (error) {
-      loggingService.logError("获取全部工作区i18n文件数据失败", error);
+      loggingService.error("获取全部工作区i18n文件数据失败", error);
     }
   }
 
   if (Object.keys(workspacesLocales).length > 0) {
-    loggingService.logInfo("获取18n文件内容成功");
+    loggingService.info("获取18n文件内容成功");
     return workspacesLocales;
   }
 }
@@ -317,7 +317,7 @@ export function updateLocalePath(filepath: string) {
       fs.writeFileSync(filepath, sortJSON({}));
     }
   } catch (error) {
-    loggingService.logError("生成国际化文件路径失败", error);
+    loggingService.error("生成国际化文件路径失败", error);
   }
 }
 
@@ -333,7 +333,7 @@ export function updateLocaleData(filepath: string, data: TLocales) {
     json = getJSON(fs.readFileSync(filepath).toString("utf8"));
     fs.writeFileSync(filepath, sortJSON({ ...json, ...data }));
   } catch (error) {
-    loggingService.logDebug("往i18n文件中追加国际化数据失败", error);
+    loggingService.debug("往i18n文件中追加国际化数据失败", error);
   }
 }
 
@@ -349,7 +349,7 @@ export function removeLocaleData(filepath: string, keys: string[]) {
     keys.forEach((key) => delete json[key]);
     fs.writeFileSync(filepath, sortJSON(json));
   } catch (error) {
-    loggingService.logDebug("删除国际化数据失败", error);
+    loggingService.debug("删除国际化数据失败", error);
   }
 }
 
