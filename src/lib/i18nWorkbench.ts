@@ -149,6 +149,7 @@ export class I18nWorkbench {
         if (data.transform) {
           i18nTransform.transformWithLocales(this.filepath, locales);
         }
+        loggingService.debug("即将关闭workbench，国际化信息保存成功");
         this.dispose();
         break;
       case EventTypes.CANCEL:

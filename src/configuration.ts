@@ -56,7 +56,8 @@ class I18nConfig {
       hoverLocales: config.get("hoverLocales", VS_CONFIG.hoverLocales),
       definitions: config.get("definitions", VS_CONFIG.definitions),
       transformOnSave: config.get("transformOnSave", VS_CONFIG.transformOnSave),
-      watchMode: config.get("watchMode", VS_CONFIG.watchMode),
+      // watchMode: config.get("watchMode", VS_CONFIG.watchMode),
+      watchMode: VS_CONFIG.watchMode,
       showWorkbench: config.get("showWorkbench", VS_CONFIG.showWorkbench),
     };
   }
@@ -72,7 +73,12 @@ class I18nConfig {
    */
   public async updateWorkspacePath(wPath: string) {
     this.workspacePath = wPath;
-    return await this.getFConfig();
+    const fConfig = await this.getFConfig();
+    loggingService.debug(
+      `工作区设置为${wPath}`,
+      `找到工作区下配置文件${fConfig}`
+    );
+    return fConfig;
   }
 
   /**

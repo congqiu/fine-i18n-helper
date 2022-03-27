@@ -11,8 +11,10 @@ import { iConfig } from "../configuration";
 import { iLocales } from "../locales";
 import { getJSON } from "../utils";
 import {
+  checkKeyInLocaleData,
   getMainLocaleData,
   getMainLocalePath,
+  getOtherLocaleFilenames,
   removeOtherLocales,
 } from "../utils/locale";
 import { isTargetLanguages } from "../utils/vscode";
@@ -47,37 +49,45 @@ export class I18nEvents {
   public saveMainLocaleTip() {
     workspace.onWillSaveTextDocument(
       (e) => {
-        const { config } = iConfig;
+        const { config, workspacePath } = iConfig;
         const { document } = e;
-        const { workspacePath } = iConfig;
+        const { wLocales } = iLocales;
         if (
           document.isDirty &&
-          iLocales.wLocales &&
+          wLocales &&
           document.fileName === getMainLocalePath(workspacePath, config)
         ) {
           const mainLocales = getMainLocaleData(
             workspacePath,
-            iLocales.wLocales,
+            wLocales,
             config
           );
           const newLocales = getJSON(document.getText());
-          const removeKeys = Object.keys(mainLocales).filter((v) => {
+          // 之前的国际化资源在新的国际化资源中没有或者不相等即认为是被改动的
+          // 逻辑变更：除上述条件外，还需要其他文件中有对应的key
+          const modifiedKeys = Object.keys(mainLocales).filter((v) => {
             return (
-              newLocales[v] === undefined || newLocales[v] !== mainLocales[v]
+              (newLocales[v] === undefined ||
+                newLocales[v] !== mainLocales[v]) &&
+              checkKeyInLocaleData(
+                wLocales,
+                v,
+                getOtherLocaleFilenames(workspacePath, config)
+              )
             );
           });
 
-          if (removeKeys.length > 0) {
+          if (modifiedKeys.length > 0) {
             window
               .showWarningMessage(
-                `当前文件修改了${removeKeys.join(
+                `当前文件修改了${modifiedKeys.join(
                   ", "
                 )}等key，将会删除其他语言文件对应key，是否删除？`,
                 ...["Yes", "No"]
               )
               .then((v) => {
                 if (v === "Yes") {
-                  removeOtherLocales(workspacePath, config, removeKeys);
+                  removeOtherLocales(workspacePath, config, modifiedKeys);
                 }
               });
           }

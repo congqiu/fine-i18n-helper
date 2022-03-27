@@ -16,24 +16,15 @@ export class LoggingService {
   }
 
   public debug(message: string, data?: unknown) {
-    this.logMessage(message, "DEBUG");
-    if (data) {
-      this.logObject(data);
-    }
+    this.logMessage(message, "DEBUG", data);
   }
 
   public info(message: string, data?: unknown) {
-    this.logMessage(message, "INFO");
-    if (data) {
-      this.logObject(data);
-    }
+    this.logMessage(message, "INFO", data);
   }
 
   public warning(message: string, data?: unknown) {
-    this.logMessage(message, "WARN");
-    if (data) {
-      this.logObject(data);
-    }
+    this.logMessage(message, "WARN", data);
   }
 
   public error(message: string, error?: unknown) {
@@ -61,13 +52,16 @@ export class LoggingService {
     this.outputChannel.appendLine(message);
   }
 
-  private logMessage(message: string, logLevel: TLogLevel) {
+  private logMessage(message: string, logLevel: TLogLevel, data?: unknown) {
     const LEVEL = ["DEBUG", "INFO", "WARN", "ERROR", "NONE"];
     if (LEVEL.slice(LEVEL.indexOf(logLevel) + 1).includes(this.logLevel)) {
       return;
     }
     const title = new Date().toLocaleTimeString();
     this.outputChannel.appendLine(`["${logLevel}" - ${title}] ${message}`);
+    if (data) {
+      this.logObject(data);
+    }
   }
 }
 

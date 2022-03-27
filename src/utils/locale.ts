@@ -116,7 +116,7 @@ export function getWorkspacesLocales(config: TVsConfiguration) {
   }
 
   if (Object.keys(workspacesLocales).length > 0) {
-    loggingService.info("获取18n文件内容成功");
+    loggingService.debug("获取18n文件内容成功");
     return workspacesLocales;
   }
 }
@@ -253,6 +253,24 @@ export function getLocaleFilepath(
  */
 export function getLocaleData(wLocales: TWLocales, filename: string) {
   return wLocales[filename] || {};
+}
+
+/**
+ * 检查key是否在国际化数据中
+ * @param wLocales 国际化数据
+ * @param key 指定的key
+ * @param filenames 检查哪些文件
+ * @returns boolean
+ */
+export function checkKeyInLocaleData(
+  wLocales: TWLocales,
+  key: string,
+  filenames?: string[]
+) {
+  if (!filenames) {
+    filenames = Object.keys(wLocales);
+  }
+  return filenames.some((filename) => wLocales[filename][key]);
 }
 
 /**
