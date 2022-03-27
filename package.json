@@ -8,7 +8,9 @@
     "translate",
     "React"
   ],
-  "version": "0.0.1",
+  "private": "true",
+  "workspaces": ["webapp"],
+  "version": "0.1.0",
   "license": "MIT",
   "publisher": "Fine",
   "repository": {
@@ -39,11 +41,6 @@
     "configuration": {
       "title": "Fine I18n Helper Configuration",
       "properties": {
-        "fine-i18n-helper.multiRootTip": {
-          "type": "boolean",
-          "default": true,
-          "description": "是否显示Multi-root工作区提示"
-        },
         "fine-i18n-helper.localesPath": {
           "type": "string",
           "default": "src/locales",
@@ -63,6 +60,11 @@
           "type": "string",
           "default": "",
           "description": "自动生成key的前缀"
+        },
+        "fine-i18n-helper.multiRootTip": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否显示Multi-root工作区提示"
         },
         "fine-i18n-helper.hoverLocales": {
           "type": [
@@ -90,6 +92,12 @@
           ],
           "default": "",
           "description": "定义key可跳转的i18n文件"
+        },
+        "fine-i18n-helper.showWorkbench": {
+          "type": "boolean",
+          "default": true,
+          "description": "转换当前文件时是否显示工作台，如不显示则直接转换",
+          "title": "转换当前文件时是否显示工作台"
         }
       }
     },
@@ -221,7 +229,9 @@
     "esbuild": "yarn esbuild-base --sourcemap",
     "watch": "yarn esbuild-base --sourcemap --watch",
     "build": "vsce package --yarn",
-    "publish-it": "vsce publish --no-yarn"
+    "publish-it": "vsce publish --no-yarn",
+    "webapp-build": "yarn workspace webapp run build",
+    "webapp-watch": "yarn workspace webapp run watch"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx,json,less}": [

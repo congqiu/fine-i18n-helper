@@ -1,10 +1,12 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
+
 import * as vscode from "vscode";
 
 import {
   changeI18nValue,
   changeLogLevel,
+  transformActiveFile,
   findI18nInFile,
   initConfigFile,
   openI18nFile,
@@ -13,7 +15,6 @@ import {
   TOpenI18nFileArgs,
 } from "./command";
 import { i18nCSV } from "./command/i18nCSV";
-import { i18nTransformFile } from "./command/i18nTransformFile";
 import { I18nTransformWord } from "./command/i18nTransformWord";
 import { iConfig } from "./configuration";
 import { COMMANDS, DOCUMENT_SELECTOR, TOOL_ID, TOOL_NAME } from "./constant";
@@ -23,6 +24,7 @@ import { I18nDecorations } from "./lib/i18nDecorations";
 import { I18nDefinitionProvider } from "./lib/i18nDefinitionProvider";
 import { iEvents } from "./lib/i18nEvents";
 import { I18nHoverProvider } from "./lib/i18nHoverProvider";
+import { i18nTransform } from "./lib/i18nTransform";
 import { loggingService } from "./lib/loggingService";
 import { iLocales } from "./locales";
 
@@ -34,6 +36,8 @@ export async function activate(context: vscode.ExtensionContext) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     `Extension Version: ${require("../package.json").version}`
   );
+
+  iConfig.setExtensionPath(context.extensionPath);
 
   // 工作区检测
   const { workspaceFolders } = vscode.workspace;
@@ -161,7 +165,7 @@ export async function activate(context: vscode.ExtensionContext) {
       iLocales.reload();
     })
   );
-  // 监听配置文件变化
+  // 监听配置变化
   vscode.workspace.onDidChangeConfiguration(
     (e) => {
       iConfig.getVsConfig();
@@ -175,6 +179,7 @@ export async function activate(context: vscode.ExtensionContext) {
       if (e.affectsConfiguration(`${TOOL_ID}.transformOnSave`)) {
         iEvents.transformFileOnSave(context);
       }
+      loggingService.debug("vscode配置发生变化");
     },
     null,
     context.subscriptions
@@ -186,14 +191,15 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // 注册国际化当前文件
   context.subscriptions.push(
-    vscode.commands.registerCommand(COMMANDS.i18nTransformFile.cmd, () =>
-      i18nTransformFile.transformActive()
+    vscode.commands.registerCommand(
+      COMMANDS.i18nTransformFile.cmd,
+      transformActiveFile
     )
   );
   // 注册国际化当前工作区
   context.subscriptions.push(
     vscode.commands.registerCommand(COMMANDS.i18nTransformWorkspace.cmd, () =>
-      i18nTransformFile.transformWorkspace()
+      i18nTransform.transformWorkspace()
     )
   );
 

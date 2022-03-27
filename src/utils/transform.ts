@@ -35,7 +35,17 @@ export interface TExtractText {
   };
 }
 
+export interface THandledText extends TExtractText {
+  key: string;
+  exist: boolean;
+}
+
 export class Transform {
+  /**
+   * 获取解析配置项
+   * @param config
+   * @returns
+   */
   private getParseOption(config: TAstConfig): babel.TransformOptions {
     return {
       sourceType: "module",
@@ -49,6 +59,12 @@ export class Transform {
     };
   }
 
+  /**
+   * path替换
+   * @param pathInfo
+   * @param functionName
+   * @param value
+   */
   private doPathReplace(
     pathInfo: Omit<TPathInfo, "text">,
     functionName: string,
@@ -171,14 +187,13 @@ export class Transform {
     });
   }
 
-  // todo 支持import形式的
-  public async transform(options: {
+  private pretreatment(options: {
     filepath: string;
     locales: TLocales;
     config: TConfiguration;
   }) {
     const { filepath, locales, config } = options;
-    const localesMap = new Map();
+    const localesMap = new Map<string, string>();
     Object.keys(locales).forEach((key) => localesMap.set(locales[key], key));
 
     // 解析当前文档为ast
@@ -195,6 +210,32 @@ export class Transform {
       return;
     }
 
+    return {
+      inCode,
+      ast,
+      localesMap,
+    };
+  }
+
+  /**
+   * 国际化转换，locales中不存在的文本自动添加
+   * @param options
+   * @returns
+   */
+  // TODO 支持import形式的
+  public async transform(options: {
+    filepath: string;
+    locales: TLocales;
+    config: TConfiguration;
+  }) {
+    const { config } = options;
+    const pretreatmentData = this.pretreatment(options);
+
+    if (!pretreatmentData) {
+      return;
+    }
+    const { inCode, ast, localesMap } = pretreatmentData;
+
     const texts: TPathInfo[] = [];
     let hasTransformed = false;
 
@@ -204,9 +245,9 @@ export class Transform {
         this.doPathReplace(
           { path: info.path, isJsx: info.isJsx },
           config.functionName,
-          localesMap.get(info.text)
+          localesMap.get(info.text) || info.text
         );
-      } else if (!config.onlyExist) {
+      } else {
         texts.push(info);
       }
     });
@@ -221,7 +262,7 @@ export class Transform {
       this.doPathReplace(
         texts[i],
         config.functionName,
-        localesMap.get(texts[i].text)
+        localesMap.get(texts[i].text) || texts[i].text
       );
     }
 
@@ -248,7 +289,58 @@ export class Transform {
   }
 
   /**
+   * 国际化转换，只转换locales中已经存在的
+   * @param options
+   * @returns
+   */
+  public async transformExist(options: {
+    filepath: string;
+    locales: TLocales;
+    config: TConfiguration;
+  }) {
+    const { config } = options;
+    const pretreatmentData = this.pretreatment(options);
+
+    if (!pretreatmentData) {
+      return;
+    }
+    const { inCode, ast, localesMap } = pretreatmentData;
+
+    let hasTransformed = false;
+
+    this.traverse(ast, config, (info) => {
+      hasTransformed = true;
+      this.doPathReplace(
+        { path: info.path, isJsx: info.isJsx },
+        config.functionName,
+        localesMap.get(info.text) || info.text
+      );
+    });
+
+    const output = generate(
+      ast,
+      {
+        decoratorsBeforeExport: config.decoratorsBeforeExport,
+      },
+      inCode
+    );
+    let outputCode = output.code;
+    try {
+      outputCode = prettier.format(outputCode, {
+        parser: "babel-ts",
+      });
+    } catch (error) {}
+
+    if (hasTransformed) {
+      return {
+        outputCode,
+      };
+    }
+  }
+
+  /**
    * 收集要被国际化的内容
+   * 返回值的line和column都是zero-based
    * @param options
    * @returns
    */
@@ -265,15 +357,24 @@ export class Transform {
 
     if (ast) {
       this.traverse(ast, config, (info) => {
+        const start = info.path.node.loc?.start || {
+          line: 1,
+          column: 0,
+        };
+        const end = info.path.node.loc?.end || {
+          line: 1,
+          column: 0,
+        };
+        // TODO 确定babel的loc的规则
         texts.push({
           text: info.text,
-          start: info.path.node.loc?.start || {
-            line: 0,
-            column: 0,
+          start: {
+            line: start.line - 1,
+            column: start.column,
           },
-          end: info.path.node.loc?.end || {
-            line: 0,
-            column: 0,
+          end: {
+            line: end.line - 1,
+            column: end.column,
           },
         });
       });
@@ -296,7 +397,7 @@ export class Transform {
   ) {
     const localesMap = new Map<string, string>();
     Object.keys(locales).forEach((key) => localesMap.set(locales[key], key));
-    const handledTexts: { text: string; key: string; exist: boolean }[] = [];
+    const handledTexts: THandledText[] = [];
 
     for (let i = 0; i < texts.length; i++) {
       const handledText = { ...texts[i] };
@@ -304,7 +405,7 @@ export class Transform {
       if (localesMap.has(text)) {
         handledTexts.push({
           ...handledText,
-          key: localesMap.get(text)!,
+          key: localesMap.get(text) || text,
           exist: true,
         });
       } else {

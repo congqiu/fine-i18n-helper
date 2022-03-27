@@ -7,7 +7,6 @@ import {
   ExtensionContext,
 } from "vscode";
 
-import { i18nTransformFile } from "../command/i18nTransformFile";
 import { iConfig } from "../configuration";
 import { iLocales } from "../locales";
 import { getJSON } from "../utils";
@@ -17,6 +16,8 @@ import {
   removeOtherLocales,
 } from "../utils/locale";
 import { isTargetLanguages } from "../utils/vscode";
+
+import { i18nTransform } from "./i18nTransform";
 
 export class I18nEvents {
   private transformFileOnSaveDisposable: Disposable | undefined;
@@ -125,7 +126,7 @@ export class I18nEvents {
             e.reason === TextDocumentSaveReason.Manual &&
             isTargetLanguages(e.document.languageId)
           ) {
-            i18nTransformFile.transformActive();
+            i18nTransform.transformActive();
           }
         },
         null,

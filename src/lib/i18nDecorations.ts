@@ -6,14 +6,19 @@ import { getMainLocaleData } from "../utils/locale";
 import { getI18nRangesInfo } from "../utils/vscode";
 
 export class I18nDecorations {
-  private i18nDecorationType = vscode.window.createTextEditorDecorationType({
-    overviewRulerLane: vscode.OverviewRulerLane.Right,
-  });
+  private i18nDecorationType: vscode.TextEditorDecorationType;
 
   private activeEditor = vscode.window.activeTextEditor;
 
   constructor(context: vscode.ExtensionContext) {
+    this.i18nDecorationType = this.createDecoration();
     this.init(context);
+  }
+
+  private createDecoration() {
+    return vscode.window.createTextEditorDecorationType({
+      overviewRulerLane: vscode.OverviewRulerLane.Right,
+    });
   }
 
   init(context: vscode.ExtensionContext) {
@@ -62,9 +67,7 @@ export class I18nDecorations {
 
   clear() {
     this.i18nDecorationType.dispose();
-    this.i18nDecorationType = vscode.window.createTextEditorDecorationType({
-      overviewRulerLane: vscode.OverviewRulerLane.Right,
-    });
+    this.i18nDecorationType = this.createDecoration();
   }
 
   // 更新

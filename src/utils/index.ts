@@ -248,3 +248,18 @@ export function sortJSON(json: TLocales) {
 
   return JSON.stringify(data, null, 2);
 }
+
+/**
+ * 延迟执行某方法
+ * @param fn 要被执行的方法
+ * @param time 延迟时长
+ * @returns 执行前取消执行的方法
+ */
+export function waitRun(fn: () => void, time = 500) {
+  const handler = setTimeout(() => {
+    fn();
+  }, time);
+  return () => {
+    clearTimeout(handler);
+  };
+}

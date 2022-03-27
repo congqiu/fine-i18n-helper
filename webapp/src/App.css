@@ -1,0 +1,48 @@
+/* TODO 以灵活的方式支持主题 */
+
+.ant-list-split .ant-list-item {
+  border-bottom: 1px solid var(--vscode-editorWidget-border);
+}
+.ant-card-bordered {
+  border: 1px solid var(--vscode-editorWidget-border);
+}
+
+.ant-card {
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+}
+.ant-checkbox-wrapper {
+  color: var(--vscode-editor-foreground);
+}
+
+.ant-input {
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  border-color: var(--vscode-editorWidget-border);
+}
+
+.vscode-dark .ant-input[disabled] {
+  color: #ffffff4d;
+  background-color: #ffffff14;
+  border-color: #434343;
+}
+
+.vscode-dark .ant-checkbox .ant-checkbox-input {
+  background-color: var(--vscode-editor-background);
+  color: #ffffffd9;
+}
+
+.ant-btn {
+  background: transparent;
+  color: var(--vscode-editor-foreground);
+  border-color: var(--vscode-editorWidget-border);
+}
+
+.ant-btn:hover, .ant-btn:focus, .ant-btn:active {
+  text-decoration: none;
+  background: transparent;
+}
+
+.buttons button {
+  margin-right: 12px;
+}

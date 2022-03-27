@@ -15,10 +15,12 @@ const VS_CONFIG = {
   definitions: "",
   transformOnSave: false,
   watchMode: true,
+  showWorkbench: false,
 };
 
 class I18nConfig {
   public workspacePath = "";
+  public extensionPath = "";
   public fConfig: TConfiguration;
   public vsConfig: TVsConfiguration = {
     ...VS_CONFIG,
@@ -55,7 +57,12 @@ class I18nConfig {
       definitions: config.get("definitions", VS_CONFIG.definitions),
       transformOnSave: config.get("transformOnSave", VS_CONFIG.transformOnSave),
       watchMode: config.get("watchMode", VS_CONFIG.watchMode),
+      showWorkbench: config.get("showWorkbench", VS_CONFIG.showWorkbench),
     };
+  }
+
+  public setExtensionPath(extensionPath: string) {
+    this.extensionPath = extensionPath;
   }
 
   /**

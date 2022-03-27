@@ -10,3 +10,6 @@ vsc-extension-quickstart.md
 **/*.ts
 
 **/node_modules/**
+assets/**
+webapp/**
+!webapp/dist/**

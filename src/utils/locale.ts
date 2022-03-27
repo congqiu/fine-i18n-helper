@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 import { BASIC_CONFIG, COMMANDS } from "../constant";
 import { loggingService } from "../lib/loggingService";
 
+import { THandledText } from "./transform";
 import {
   TWLocales,
   TVsConfiguration,
@@ -394,4 +395,23 @@ export function getLocaleCompletionItem(
     completion.insertText = key;
     return completion;
   });
+}
+
+/**
+ * 把texts转换成国际化数据
+ * @param texts THandledText
+ * @returns \{ locales, newLocales }
+ */
+export function convertTexts2Locales(
+  texts: (THandledText & { override?: boolean })[]
+) {
+  let newLocales: TLocales = {};
+  const locales: TLocales = {};
+  texts.forEach((v) => {
+    locales[v.key] = v.text;
+    if (!v.exist || v.override) {
+      newLocales = { ...newLocales, [v.key]: v.text };
+    }
+  });
+  return { locales, newLocales };
 }

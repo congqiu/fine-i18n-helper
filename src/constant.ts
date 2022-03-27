@@ -83,5 +83,4 @@ export const EXT_CONFIG: TExtConfiguration = {
   decoratorsBeforeExport: true,
   importLine: "",
   judgeText: /[\u4e00-\u9fa5]/,
-  onlyExist: false,
 };

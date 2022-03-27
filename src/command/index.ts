@@ -14,6 +14,8 @@ import {
 import { iConfig } from "../configuration";
 import { TOOL_ALIAS, TOOL_NAME } from "../constant";
 import { iEvents } from "../lib/i18nEvents";
+import { i18nTransform } from "../lib/i18nTransform";
+import { i18nWorkbench } from "../lib/i18nWorkbench";
 import { loggingService, LOG_LEVEL, TLogLevel } from "../lib/loggingService";
 import { iLocales } from "../locales";
 import { getKeyPosition } from "../utils";
@@ -23,7 +25,7 @@ import {
   getMainLocaleFilename,
   getMainLocaleData,
 } from "../utils/locale";
-import { getI18nRangesInfo } from "../utils/vscode";
+import { getI18nRangesInfo, showInfoMessage } from "../utils/vscode";
 
 export interface TOpenI18nFileArgs {
   filename: string;
@@ -209,4 +211,20 @@ export const changeLogLevel = () => {
       loggingService.info(`日志等级切换为${val}`);
     }
   });
+};
+
+export const transformActiveFile = async () => {
+  if (iConfig.config.showWorkbench) {
+    const result = await i18nTransform.extractActive();
+    if (result) {
+      result.texts.length > 0
+        ? i18nWorkbench.show(result)
+        : showInfoMessage(
+            "当前文件无可国际化的内容",
+            `${result.filepath} 无可国际化内容`
+          );
+    }
+  } else {
+    await i18nTransform.transformActive();
+  }
 };
