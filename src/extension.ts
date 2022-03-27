@@ -14,16 +14,16 @@ import {
   TChangeI18nValueArgs,
   TOpenI18nFileArgs,
 } from "./command";
+import { I18nCompletionItemProvider } from "./command/i18nCompletionProvider";
 import { i18nCSV } from "./command/i18nCSV";
-import { I18nTransformWord } from "./command/i18nTransformWord";
+import { I18nDecorations } from "./command/i18nDecorations";
+import { I18nDefinitionProvider } from "./command/i18nDefinitionProvider";
+import { I18nHoverProvider } from "./command/i18nHoverProvider";
+import { i18nTransformWord } from "./command/i18nTransformWord";
 import { iConfig } from "./configuration";
 import { COMMANDS, DOCUMENT_SELECTOR, TOOL_ID, TOOL_NAME } from "./constant";
 import { changeWorkspaceBar, createI18nBar } from "./lib";
-import { I18nCompletionItemProvider } from "./lib/i18nCompletionProvider";
-import { I18nDecorations } from "./lib/i18nDecorations";
-import { I18nDefinitionProvider } from "./lib/i18nDefinitionProvider";
 import { iEvents } from "./lib/i18nEvents";
-import { I18nHoverProvider } from "./lib/i18nHoverProvider";
 import { i18nTransform } from "./lib/i18nTransform";
 import { loggingService } from "./lib/loggingService";
 import { iLocales } from "./locales";
@@ -125,9 +125,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // 注册选中文字进行国际化
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      COMMANDS.i18nTransformWord.cmd,
-      () => new I18nTransformWord()
+    vscode.commands.registerCommand(COMMANDS.i18nTransformWord.cmd, () =>
+      i18nTransformWord()
     )
   );
 
