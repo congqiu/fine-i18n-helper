@@ -42,12 +42,12 @@
         "fine-i18n-helper.multiRootTip": {
           "type": "boolean",
           "default": true,
-          "description": "是否显示Multi-root工作区提示，一般情况下不需要配置"
+          "description": "是否显示Multi-root工作区提示"
         },
         "fine-i18n-helper.localesPath": {
           "type": "string",
           "default": "src/locales",
-          "description": "国际化文件所在文件夹，默认为src/locales"
+          "description": "国际化文件所在文件夹"
         },
         "fine-i18n-helper.mainLocale": {
           "type": "string",
@@ -57,12 +57,12 @@
         "fine-i18n-helper.functionName": {
           "type": "string",
           "default": "fineIntl.get",
-          "description": "i18n的方法名"
+          "description": "国际化调用的方法名"
         },
         "fine-i18n-helper.prefix": {
           "type": "string",
           "default": "",
-          "description": "自动生成的key前缀"
+          "description": "自动生成key的前缀"
         },
         "fine-i18n-helper.hoverLocales": {
           "type": [
@@ -71,7 +71,7 @@
             "null"
           ],
           "default": "",
-          "description": "定义hover显示的翻译值，默认或为空字符串显示全部，为null则不显示"
+          "description": "定义hover显示的翻译值，为空字符串显示全部，为null则不显示"
         },
         "fine-i18n-helper.showDecorations": {
           "type": "boolean",
@@ -131,7 +131,7 @@
       },
       {
         "command": "fine-i18n-helper.i18nTransformWorkspace",
-        "title": "转换当前工作区"
+        "title": "转换工作区指定文件"
       },
       {
         "command": "fine-i18n-helper.toggleShowI18n",

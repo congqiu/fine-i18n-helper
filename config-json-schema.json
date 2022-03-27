@@ -6,7 +6,7 @@
       "type": "object",
       "properties": {
         "localesPath": {
-          "description": "国际化文件所在文件夹，默认为src/locales",
+          "description": "国际化文件所在文件夹",
           "default": "src/locales",
           "type": "string"
         },
@@ -16,27 +16,27 @@
           "type": "string"
         },
         "functionName": {
-          "description": "国际化的方法名",
+          "description": "国际化调用的方法名",
           "default": "fineIntl.get",
           "type": "string"
         },
         "prefix": {
-          "description": "自动生成的key前缀",
+          "description": "自动生成key的前缀",
           "default": "",
           "type": "string"
         },
         "entry": {
-          "description": "国际化整个空间的入口文件夹",
+          "description": "转换工作区指定文件的入口",
           "default": "src",
           "type": "string"
         },
         "exclude": {
-          "description": "国际化整个空间时排除的文件",
+          "description": "转换工作区指定文件时排除的文件",
           "default": [],
           "type": "array"
         },
         "decoratorsBeforeExport": {
-          "description": "针对babel转换decorators的属性",
+          "description": "针对babel转换配置decorators",
           "default": true,
           "type": "boolean"
         },
