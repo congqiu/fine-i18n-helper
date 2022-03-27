@@ -1,4 +1,4 @@
-import { Button, Card, Checkbox, Input, List } from "antd";
+import { Button, Card, Checkbox, Empty, Input, List } from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { useLayoutEffect, useState } from "react";
 
@@ -20,10 +20,11 @@ export interface THandledText {
   override?: boolean;
 }
 
-const vscode = window.acquireVsCodeApi();
+const vscode = window.acquireVsCodeApi?.();
 export const App = () => {
   const [texts, setTexts] = useState<THandledText[]>([]);
   const [loading, setLoading] = useState(false);
+  const [filename, setFilename] = useState("");
 
   useLayoutEffect(() => {
     sendMessage(EventTypes.READY);
@@ -32,6 +33,7 @@ export const App = () => {
       switch (message.type) {
         case EventTypes.CONFIG:
           setTexts(message.data.texts);
+          setFilename(message.data.filename);
           break;
         default:
           break;
@@ -71,10 +73,12 @@ export const App = () => {
       <List
         itemLayout="vertical"
         size="large"
+        header={`请转换：${filename}`}
         dataSource={texts}
+        locale={{ emptyText: <Empty description="没有需要处理的国际化" /> }}
         renderItem={(text, index) => (
           <List.Item>
-            <Card>
+            <Card bordered={false}>
               <div>{text.text}</div>
               <Input
                 placeholder="请输入国际化的key"
@@ -98,10 +102,10 @@ export const App = () => {
       <div className="buttons">
         <Button onClick={() => sendMessage(EventTypes.CANCEL)}>取消</Button>
         <Button disabled={loading} onClick={() => handleSave(true)}>
-          提交并修改文件
+          保存并修改文件
         </Button>
         <Button disabled={loading} onClick={() => handleSave(false)}>
-          只提交到国际化文件中
+          只保存国际化信息
         </Button>
       </div>
     </div>

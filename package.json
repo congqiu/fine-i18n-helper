@@ -9,7 +9,9 @@
     "React"
   ],
   "private": "true",
-  "workspaces": ["webapp"],
+  "workspaces": [
+    "webapp"
+  ],
   "version": "0.1.0",
   "license": "MIT",
   "publisher": "Fine",
@@ -218,11 +220,11 @@
   },
   "scripts": {
     "prepare": "husky install",
-    "vscode:prepublish": "yarn clean && yarn esbuild-base --minify",
+    "vscode:prepublish": "npm-run-all webapp-clean clean webapp-build 'esbuild-base --minify'",
     "lint": "eslint src --fix --ext ts",
     "compile": "tsc -p ./",
     "watch:tsc": "tsc -watch -p ./",
-    "pretest": "yarn compile && yarn lint",
+    "pretest": "npm-run-all compile lint",
     "test": "node ./out/test/runTest.js",
     "clean": "rimraf out/",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
@@ -231,13 +233,20 @@
     "build": "vsce package --yarn",
     "publish-it": "vsce publish --no-yarn",
     "webapp-build": "yarn workspace webapp run build",
-    "webapp-watch": "yarn workspace webapp run watch"
+    "webapp-watch": "yarn workspace webapp run watch",
+    "webapp-clean": "yarn workspace webapp run clean"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx,json,less}": [
       "prettier --write"
     ],
     "src/**/*.{js,ts}": [
+      "eslint"
+    ],
+    "webapp/src/**/*.{js,jsx,ts,tsx,json,less}": [
+      "prettier --write"
+    ],
+    "webapp/src/**/*.{js,ts}": [
       "eslint"
     ]
   },
@@ -260,8 +269,10 @@
     "husky": "^7.0.4",
     "lint-staged": "^12.3.7",
     "mocha": "^9.1.3",
+    "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "vsce": "^2.7.0"
   },
   "dependencies": {
     "@babel/core": "^7.16.7",

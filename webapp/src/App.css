@@ -1,10 +1,16 @@
 /* TODO 以灵活的方式支持主题 */
 
-.ant-list-split .ant-list-item {
+.ant-list {
+  color: var(--vscode-editor-foreground);
+}
+
+.ant-list-split .ant-list-header {
   border-bottom: 1px solid var(--vscode-editorWidget-border);
 }
-.ant-card-bordered {
-  border: 1px solid var(--vscode-editorWidget-border);
+
+.ant-list-split .ant-list-item {
+  border-bottom: 1px solid var(--vscode-editorWidget-border);
+  padding: 0;
 }
 
 .ant-card {

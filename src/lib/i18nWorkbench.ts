@@ -11,6 +11,7 @@ import {
 } from "vscode";
 
 import { iConfig } from "../configuration";
+import { getFilename } from "../utils";
 import { convertTexts2Locales } from "../utils/locale";
 import { THandledText } from "../utils/transform";
 import { showErrorMessageTip } from "../utils/vscode";
@@ -86,9 +87,20 @@ export class I18nWorkbench {
     switch (type) {
       case EventTypes.READY:
         // 面板准备完成，发送相关信息
+        if (!this.filepath) {
+          showErrorMessageTip(
+            "保存文件失败，未找到文件",
+            `${this.filepath}未找到`
+          );
+          this.dispose();
+          return;
+        }
         this.sendMessage({
           type: EventTypes.CONFIG,
-          data: { filepath: this.filepath, texts: this.texts },
+          data: {
+            filename: getFilename(this.filepath, true),
+            texts: this.texts,
+          },
         });
         break;
       case EventTypes.FOCUS:
