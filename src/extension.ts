@@ -45,6 +45,9 @@ export async function activate(context: vscode.ExtensionContext) {
     loggingService.warning(`${TOOL_NAME}目前只支持在工作区环境下使用`);
     return;
   }
+
+  // --------------------------配置不正确的情况下支持的功能---------------------
+
   const configPath = await iConfig.updateWorkspacePath(
     workspaceFolders[0].uri.fsPath
   );
@@ -64,12 +67,28 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(changeWorkspaceBar());
   }
 
+  // 初始化配置文件
+  context.subscriptions.push(
+    vscode.commands.registerCommand(COMMANDS.initConfigFile.cmd, initConfigFile)
+  );
+
   // 注册切换工作区
   context.subscriptions.push(
     vscode.commands.registerCommand(COMMANDS.changeWorkspace.cmd, () =>
       selectWorkspace(workspaceFolders)
     )
   );
+
+  if (!iLocales.check(iConfig.workspacePath)) {
+    loggingService.warning(
+      `${TOOL_NAME}扩展在当前工作区不生效`,
+      `工作区中未找到${iConfig.config.localesPath}目录，如需使用请修改配置或创建对应目录`
+    );
+    // TODO 配置不正确的情况下不支持以下功能
+    // return;
+  }
+
+  // --------------------------配置不正确的情况下不支持以下功能---------------------
 
   // 注册hover显示国际化值
   context.subscriptions.push(
@@ -151,15 +170,14 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(COMMANDS.changeLogLevel.cmd, changeLogLevel)
   );
 
-  // 初始化配置文件
-  context.subscriptions.push(
-    vscode.commands.registerCommand(COMMANDS.initConfigFile.cmd, initConfigFile)
-  );
-
   iEvents.init(context);
   // 注册重新加载
   context.subscriptions.push(
-    vscode.commands.registerCommand(COMMANDS.reload.cmd, () => {
+    vscode.commands.registerCommand(COMMANDS.reload.cmd, async () => {
+      const configPath = await iConfig.updateWorkspacePath(
+        iConfig.workspacePath
+      );
+      iEvents.watchConfigurationFile(configPath);
       iEvents.watchLocalesFile();
       iLocales.reload();
     })

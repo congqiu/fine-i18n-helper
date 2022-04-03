@@ -12,6 +12,7 @@ import { iLocales } from "../locales";
 import { getJSON } from "../utils";
 import {
   checkKeyInLocaleData,
+  createLocalesFolder,
   getMainLocaleData,
   getMainLocalePath,
   getOtherLocaleFilenames,
@@ -110,7 +111,7 @@ export class I18nEvents {
    * 监听locales中的文件
    */
   public watchLocalesFile() {
-    if (iConfig.config.watchMode) {
+    if (iConfig.config.watchMode && iConfig.config.localesPath) {
       this.localesFileWatcher = workspace.createFileSystemWatcher(
         `${iConfig.workspacePath}/${iConfig.config.localesPath}/**/*.{ts,js,json}`,
         true
@@ -155,6 +156,8 @@ export class I18nEvents {
   public watchConfigurationFile(filepath?: string, dispose = false) {
     this.configFileWatcher?.dispose();
     if (filepath && !dispose) {
+      // 如果有配置文件则自动创建国际化目录
+      createLocalesFolder(iConfig.workspacePath, iConfig.config.localesPath);
       iLocales.reload();
       this.configFileWatcher = workspace.createFileSystemWatcher(
         filepath,

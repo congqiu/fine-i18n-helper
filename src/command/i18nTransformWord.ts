@@ -16,10 +16,8 @@ export const i18nTransformWord = async () => {
   if (!editor) {
     return;
   }
-  const { document } = editor;
-  const { selection } = editor;
-  const { config } = iConfig;
-  const { workspacePath } = iConfig;
+  const { document, selection } = editor;
+  const { config, workspacePath } = iConfig;
 
   if (!iLocales.check(workspacePath)) {
     const res = await window.showInformationMessage(
@@ -29,7 +27,6 @@ export const i18nTransformWord = async () => {
     );
     if (res === "创建") {
       createLocalesFolder(workspacePath, config.localesPath);
-      loggingService.debug(`新建${config.localesPath}文件夹并继续！`);
       i18nTransformWord();
     }
     return;

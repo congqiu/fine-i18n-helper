@@ -76,7 +76,7 @@ class I18nConfig {
     const fConfig = await this.getFConfig();
     loggingService.debug(
       `工作区设置为${wPath}`,
-      `找到工作区下配置文件${fConfig}`
+      fConfig ? `找到工作区下配置文件${fConfig}` : `该工作区中不存在配置文件`
     );
     return fConfig;
   }

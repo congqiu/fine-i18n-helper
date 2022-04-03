@@ -63,6 +63,7 @@ export function createLocalesFolder(
 ) {
   if (!checkLocalesPath(workspacePath, localesPath)) {
     mkdirsSync(path.join(workspacePath, localesPath));
+    loggingService.debug(`新建${localesPath}文件夹成功！`);
   }
 }
 
@@ -73,6 +74,7 @@ export function createLocalesFolder(
  */
 export function getLocalesData(localesFolder: string) {
   if (!fs.existsSync(localesFolder)) {
+    loggingService.warning(`${localesFolder}文件夹不存在`);
     return;
   }
 
@@ -90,6 +92,7 @@ export function getLocalesData(localesFolder: string) {
   if (Object.keys(locales).length > 0) {
     return locales;
   }
+  loggingService.info(`${localesFolder}未获取到国际化数据`);
 }
 
 /**

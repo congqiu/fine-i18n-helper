@@ -24,6 +24,7 @@ import {
   updateLocaleData,
   getMainLocaleFilename,
   getMainLocaleData,
+  createLocalesFolder,
 } from "../utils/locale";
 import { getI18nRangesInfo, showInfoMessage } from "../utils/vscode";
 
@@ -202,6 +203,8 @@ export const initConfigFile = async () => {
   );
   window.showTextDocument(Uri.file(filepath), {});
   loggingService.info(`配置文件${filename}写入成功`);
+
+  createLocalesFolder(iConfig.workspacePath, iConfig.config.localesPath);
 };
 
 export const changeLogLevel = () => {

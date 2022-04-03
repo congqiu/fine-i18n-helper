@@ -45,7 +45,6 @@ export class I18nTransform {
       );
       if (res === "创建") {
         createLocalesFolder(workspacePath, localesPath);
-        loggingService.debug(`新建${localesPath}文件夹并继续！`);
         cb();
       }
       loggingService.info(`用户取消创建${localesPath}文件夹，后续操作不执行！`);
