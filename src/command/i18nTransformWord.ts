@@ -59,6 +59,11 @@ export const i18nTransformWord = async () => {
       title: `确认"${text}"的key`,
       prompt: text,
       value: result.key,
+      validateInput: (input) => {
+        if (locales[input] && locales[input] !== text) {
+          return `"${input}"已作为"${locales[input]}"的key存在，请重新输入`;
+        }
+      },
     });
     if (!key) {
       loggingService.debug(`'${text}'转换未完成，用户取消或没有获取到key`);

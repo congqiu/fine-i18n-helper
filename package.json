@@ -12,7 +12,7 @@
   "workspaces": [
     "webapp"
   ],
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "publisher": "Fine",
   "repository": {
@@ -221,7 +221,7 @@
   "scripts": {
     "postversion": "git push && git push --tags",
     "prepare": "husky install",
-    "vscode:prepublish": "npm-run-all webapp-clean clean webapp-build 'esbuild-base --minify'",
+    "vscode:prepublish": "npm-run-all webapp-clean clean webapp-build esbuild-prod",
     "lint": "eslint src --fix --ext ts",
     "compile": "tsc -p ./",
     "watch:tsc": "tsc -watch -p ./",
@@ -230,6 +230,7 @@
     "clean": "rimraf out/",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "yarn esbuild-base --sourcemap",
+    "esbuild-prod": "yarn esbuild-base --minify",
     "watch": "yarn esbuild-base --sourcemap --watch",
     "build": "vsce package --yarn",
     "publish-it": "vsce publish --no-yarn",

@@ -1,9 +1,10 @@
-import { Button, Card, Checkbox, Empty, Input, List } from "antd";
+import { Button, Card, Checkbox, Empty, List } from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { useLayoutEffect, useState } from "react";
 
 import "antd/dist/antd.compact.css";
 import "./App.css";
+import { Input } from "./Components/Input";
 
 export enum EventTypes {
   READY, // 面板初始化完成
@@ -23,6 +24,7 @@ export interface THandledText {
 const vscode = window.acquireVsCodeApi?.();
 export const App = () => {
   const [texts, setTexts] = useState<THandledText[]>([]);
+  const [keys, setKeys] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [filename, setFilename] = useState("");
 
@@ -33,6 +35,7 @@ export const App = () => {
       switch (message.type) {
         case EventTypes.CONFIG:
           setTexts(message.data.texts);
+          setKeys(message.data.keys);
           setFilename(message.data.filename);
           break;
         default:
@@ -53,12 +56,9 @@ export const App = () => {
     });
   };
 
-  const handleValue = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => {
+  const handleValue = (value: string, index: number) => {
     const newTexts = [...texts];
-    newTexts[index].key = e.target.value;
+    newTexts[index].key = value;
     setTexts(newTexts);
   };
 
@@ -84,7 +84,18 @@ export const App = () => {
                 placeholder="请输入国际化的key"
                 disabled={text.exist && !text.override}
                 value={text.key}
-                onChange={(e) => handleValue(e, index)}
+                rules={[
+                  {
+                    required: true,
+                    message: "国际化的key不能为空",
+                  },
+                  {
+                    validate: (value) =>
+                      !keys.some((key) => key === value && text.key !== key),
+                    message: `当前key已存在，请重新输入`,
+                  },
+                ]}
+                onChange={(v) => handleValue(v, index)}
                 onFocus={() => sendMessage(EventTypes.FOCUS, { index })}
               />
               {text.exist ? (

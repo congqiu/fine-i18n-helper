@@ -18,7 +18,7 @@ import { i18nTransform } from "../lib/i18nTransform";
 import { i18nWorkbench } from "../lib/i18nWorkbench";
 import { loggingService, LOG_LEVEL, TLogLevel } from "../lib/loggingService";
 import { iLocales } from "../locales";
-import { getKeyPosition } from "../utils";
+import { getKeyFromJson, getKeyPosition } from "../utils";
 import {
   getLocaleFilepath,
   updateLocaleData,
@@ -113,11 +113,18 @@ export const changeI18nValue = (args: TChangeI18nValueArgs) => {
   }
   const { config } = iConfig;
   const { workspacePath } = iConfig;
+  const mainLocalesData = getMainLocaleData(workspacePath, locales, config);
   window
     .showInputBox({
       title: `修改${key}对应的中文`,
       prompt: "修改中文会清空其他语言对应的key",
       value: text,
+      validateInput: (val) => {
+        const existKey = getKeyFromJson(mainLocalesData, val);
+        if (val && existKey && existKey !== key) {
+          return `当前文案已存在"${existKey}"，暂不支持修改！`;
+        }
+      },
     })
     .then((value) => {
       if (!value) {

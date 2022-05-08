@@ -11,8 +11,9 @@ import {
 } from "vscode";
 
 import { iConfig } from "../configuration";
+import { iLocales } from "../locales";
 import { getFilename } from "../utils";
-import { convertTexts2Locales } from "../utils/locale";
+import { convertTexts2Locales, getMainLocaleData } from "../utils/locale";
 import { THandledText } from "../utils/transform";
 import { showErrorMessageTip } from "../utils/vscode";
 
@@ -100,6 +101,13 @@ export class I18nWorkbench {
           data: {
             filename: getFilename(this.filepath, true),
             texts: this.texts,
+            keys: Object.keys(
+              getMainLocaleData(
+                iConfig.workspacePath,
+                iLocales.wLocales || {},
+                iConfig.config
+              )
+            ),
           },
         });
         break;

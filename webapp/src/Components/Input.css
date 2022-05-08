@@ -1,0 +1,28 @@
+.validation-input .ant-input-suffix {
+  color: inherit;
+}
+.validation-input .ant-input-suffix > div {
+  display: flex;
+}
+.validation-input.error {
+  color: var(--vscode-inputValidation-errorBorder);
+  border-color: var(--vscode-inputValidation-errorBorder);
+}
+.validation-input.error:hover {
+  border-color: var(--vscode-inputValidation-errorBorder);
+}
+.validation-input.error .fvs-icon {
+  color: var(--vscode-inputValidation-errorBorder);
+}
+.input-error-tip .ant-tooltip-arrow-content {
+  background-color: var(--vscode-editor-background);
+}
+.input-error-tip .ant-tooltip-inner {
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-inputValidation-errorBorder);
+}
+.ant-input-affix-wrapper {
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  border-color: var(--vscode-editorWidget-border);
+}
