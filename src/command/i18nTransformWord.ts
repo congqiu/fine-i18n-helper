@@ -8,6 +8,7 @@ import {
   createLocalesFolder,
   updateLocaleData,
   getMainLocalePath,
+  getMainLocaleData,
 } from "../utils/locale";
 import { showErrorMessageTip } from "../utils/vscode";
 
@@ -32,7 +33,10 @@ export const i18nTransformWord = async () => {
     return;
   }
 
-  const wLocales = iLocales.wLocales || {};
+  const { wLocales } = iLocales;
+  const locales = wLocales
+    ? getMainLocaleData(workspacePath, wLocales, config)
+    : {};
 
   let quote = "'";
   let text = document.getText(selection);
@@ -43,7 +47,7 @@ export const i18nTransformWord = async () => {
       return p2;
     });
     loggingService.debug(`开始转换'${text}'`);
-    const result = await transformText(text, wLocales, config.prefix);
+    const result = await transformText(text, locales, config.prefix);
 
     loggingService.debug(
       `'${text}'的key获取结束，${

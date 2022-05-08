@@ -10,7 +10,7 @@ import * as prettier from "prettier";
 import { generateI18nFunction, hasI18nText, replaceLineBreak } from "./ast";
 import { TConfiguration, TLocales } from "./types";
 
-import { autoTranslateText } from ".";
+import { getUniqueKey } from ".";
 
 interface TPathInfo {
   text: string;
@@ -255,7 +255,11 @@ export class Transform {
     const newLocales: TLocales = {};
     for (let i = 0; i < texts.length; i++) {
       if (!localesMap.has(texts[i].text)) {
-        const key = await autoTranslateText(texts[i].text, config.prefix);
+        const key = await getUniqueKey(
+          texts[i].text,
+          options.locales,
+          config.prefix
+        );
         localesMap.set(texts[i].text, key);
         newLocales[key] = texts[i].text;
       }
@@ -409,7 +413,7 @@ export class Transform {
           exist: true,
         });
       } else {
-        const key = await autoTranslateText(text, prefix);
+        const key = await getUniqueKey(text, locales, prefix);
         handledTexts.push({ ...handledText, key, exist: false });
       }
     }

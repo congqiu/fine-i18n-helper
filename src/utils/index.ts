@@ -8,7 +8,7 @@ import { TOOL_NAME } from "../constant";
 
 import { loggingService } from "../lib/loggingService";
 
-import { TConfiguration, TLocales, TWLocales } from "./types";
+import { TConfiguration, TLocales } from "./types";
 
 /**
  * 获取路径中的文件名
@@ -42,6 +42,7 @@ export function mkdirsSync(dirname: string) {
  */
 export function getJSON(source: string): TLocales {
   try {
+    // TODO 支持更多形式
     return JSON.parse(source);
   } catch (error) {
     return {};
@@ -98,6 +99,22 @@ export function coverPrefixToRegExp(prefix: string) {
 }
 
 /**
+ * 获取一个自动递增的名称
+ * @param names 当前全部名称
+ * @param name 基准名称
+ * @returns
+ */
+export function incrementalName(names: string[], name: string) {
+  let index = 0;
+  let same = true;
+  while (same) {
+    const uniqName = `${name}${++index}`;
+    same = names.some((v) => v === uniqName);
+  }
+  return `${name}_${index}`;
+}
+
+/**
  * 获取指定目录下的全部指定文件
  * @param pattern
  * @param exclude
@@ -150,29 +167,25 @@ export function getKeyPosition(filepath: string, key: string) {
 /**
  * 通过文本获取i18n信息
  * @param text 文本
- * @param locales 当前工作区国际化信息
+ * @param locales 当前主国际化信息
  * @param prefix 前缀
  * @returns
  */
 export async function transformText(
   text: string,
-  locales: TWLocales,
+  locales: TLocales,
   prefix: string
 ) {
   let key = "";
   let add = false;
 
-  const filenames = Object.keys(locales);
-  for (let i = 0; i < filenames.length; i++) {
-    const result = getKeyFromJson(locales[filenames[i]], text);
-    if (result) {
-      key = result;
-      break;
-    }
+  const result = getKeyFromJson(locales, text);
+  if (result) {
+    key = result;
   }
 
   if (!key) {
-    key = await autoTranslateText(text, prefix);
+    key = await getUniqueKey(text, locales, prefix);
     add = true;
   }
 
@@ -195,6 +208,18 @@ export function getKeyFromJson(json: TLocales, value: string) {
       return key;
     }
   }
+}
+
+export async function getUniqueKey(
+  text: string,
+  locales: TLocales,
+  prefix = ""
+) {
+  let key = await autoTranslateText(text, prefix);
+  if (locales[key]) {
+    key = incrementalName(Object.keys(locales), key);
+  }
+  return key;
 }
 
 /**
