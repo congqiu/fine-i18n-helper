@@ -80,7 +80,7 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   if (!iLocales.check(iConfig.workspacePath)) {
-    loggingService.warning(
+    loggingService.error(
       `${TOOL_NAME}扩展在当前工作区不生效`,
       `工作区中未找到${iConfig.config.localesPath}目录，如需使用请修改配置或创建对应目录`
     );
